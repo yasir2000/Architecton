@@ -404,6 +404,70 @@ def check(ir, check_files=True):
     return Checker(ir, check_files).run()
 
 
+# ---------------------------------------------------------------- interpreter
+#
+# A Python reading of `step` in formal/Step.lean, used to compute test-oracle
+# expectations. It is NOT trusted: oracles generated with it are re-checked by
+# the Lean kernel against the Lean specification.
+
+
+class Stuck(IRError):
+    pass
+
+
+def eval_expr(e, state, params):
+    (op, arg), = e.items()
+    if op == "var":
+        return state[arg]
+    if op == "param":
+        return params[arg]
+    if op in ("bool", "nat"):
+        return arg
+    if op == "not":
+        return not eval_expr(arg, state, params)
+    if op == "nodup":
+        xs = eval_expr(arg, state, params)
+        return len(set(xs)) == len(xs)
+    a, b = (eval_expr(x, state, params) for x in arg)
+    if op == "and":
+        return a and b
+    if op == "or":
+        return a or b
+    if op == "eq_nat":
+        return a == b
+    if op == "contains":
+        return b in a
+    if op == "cons":
+        return [a] + list(b)
+    raise Stuck(f"unknown operator {op!r}")
+
+
+def run_step(ir, transition_id, state, params):
+    """Run one transition. Returns (new_state, outcome); `state` is not mutated."""
+    matches = [t for t in ir["transitions"] if t["id"] == transition_id]
+    if len(matches) != 1:
+        raise IRError(f"no unique transition {transition_id!r}")
+    tr = matches[0]
+    for g in tr["guards"]:
+        fired = eval_expr(g["when"], state, params)
+        if not isinstance(fired, bool):
+            raise Stuck(f"guard for {g['requirement']} is not Boolean")
+        if fired:
+            return dict(state), g["outcome"]
+    # Simultaneous assignment: evaluate every right-hand side in the pre-state.
+    writes = [(a["var"], eval_expr(a["value"], state, params)) for a in tr["otherwise"]["effect"]]
+    new = dict(state)
+    new.update(writes)
+    return new, tr["otherwise"]["outcome"]
+
+
+def holds(ir, invariant_id, state):
+    matches = [i for i in ir["invariants"] if i["id"] == invariant_id]
+    if len(matches) != 1:
+        raise IRError(f"no unique invariant {invariant_id!r}")
+    return eval_expr(matches[0]["body"], state, {}) is True
+
+
 # ---------------------------------------------------------------- Lean generation
 
 

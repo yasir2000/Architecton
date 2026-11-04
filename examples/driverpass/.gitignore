@@ -5,3 +5,5 @@ formal/*.olean
 *.db-shm
 *.db-wal
 __pycache__/
+ir/*.olean
+ir/*.ilean

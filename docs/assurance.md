@@ -9,7 +9,10 @@
 | Generated files reflect the normalized policy | Python generation consistency check | Fixed policy vocabulary, not general BRD translation |
 | Rust matches examples | Shared scenario and bounded-domain Rust tests | Finite examples, not universal Lean↔Rust proof |
 | API handles scenarios and audit | HTTP/SQLite smoke test | Single-process local database example |
-| Cross-language observational equivalence | **Not proved** | Needs a refinement/simulation proof |
+| IR transition computes the Lean `allocate` | Lean theorem `ir_refines_allocate` ([Refinement.lean](../examples/driverpass/ir/Refinement.lean)) | All rosters and slots; Lean model only |
+| INV-001 (no slot held twice) is preserved | Lean theorems `allocate_preserves_nodup`, `ir_preserves_inv001` | All rosters and slots; Lean model only |
+| Rust agrees with Lean on the oracle | 850 IR-derived vectors, each kernel-checked against Lean ([Oracle.lean](../examples/driverpass/ir/Oracle.lean)), replayed in Rust ([oracle.rs](../examples/driverpass/backend/tests/oracle.rs)) | Bounded: rosters of length ≤ 3 over slots 0–3, requests 0–4 |
+| Rust ↔ Lean equivalence for all inputs | **Not proved** | Bounded testing only; Rust `i64` vs Lean `Nat` also differ on negative slots, which the API rejects before `allocate` |
 | Correctness of compiler, SQLite, OS, network or Docker | **Not proved** | Outside trusted model boundary |
 | Authentication and authorization | **Not implemented** | Do not expose the example publicly |
 

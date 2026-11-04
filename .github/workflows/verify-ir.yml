@@ -32,6 +32,8 @@ jobs:
           python3 packages/ir/scripts/irc.py lean --check
           examples/driverpass/ir/driverpass.ir.json
           --out examples/driverpass/ir/DriverPassIR.lean --ident driverPass
+      - name: Check the cross-language oracle is in sync with the IR
+        run: python3 examples/driverpass/scripts/gen_oracle.py --check
       - name: Reject proof holes and axioms in IR Lean sources
         run: |
           if grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]|native_decide' \
@@ -48,5 +50,15 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           LEAN_PATH=formal lean -o formal/ArtifactIR.olean formal/ArtifactIR.lean
+          LEAN_PATH=formal lean -o formal/Step.olean formal/Step.lean
           LEAN_PATH=formal lean formal/Negative.lean
-          LEAN_PATH=formal lean ../../examples/driverpass/ir/DriverPassIR.lean
+      - name: Kernel-check IR ↔ Lean refinement and the cross-language oracle
+        working-directory: packages/ir
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          DP=../../examples/driverpass
+          export LEAN_PATH="formal:$DP/formal:$DP/ir"
+          lean -o $DP/formal/DriverPass.olean $DP/formal/DriverPass.lean
+          lean -o $DP/ir/DriverPassIR.olean $DP/ir/DriverPassIR.lean
+          lean $DP/ir/Refinement.lean
+          lean $DP/ir/Oracle.lean

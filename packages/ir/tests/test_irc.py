@@ -156,7 +156,9 @@ class Rejects(unittest.TestCase):
 
     def test_anchor_text_missing(self):
         ir = base()
-        ir["requirements"][0]["provenance"][1]["anchor"] = "theorem does_not_exist"
+        anchor = next(a for a in ir["requirements"][0]["provenance"]
+                      if a["artifact"] == "ART-LEAN-PROOFS")
+        anchor["anchor"] = "theorem does_not_exist"
         self.expect(ir, "not found in ART-LEAN-PROOFS")
 
     def test_anchor_in_docx_missing(self):
@@ -186,6 +188,46 @@ class Rejects(unittest.TestCase):
             rc = irc.main(["lean", str(DRIVERPASS), "--check", "--out", str(out),
                            "--ident", "driverPass"])
         self.assertEqual(rc, 1)
+
+
+class Interpreter(unittest.TestCase):
+    """The Python reading of formal/Step.lean `step`."""
+
+    def run_assign(self, off_duty, slots, slot):
+        return irc.run_step(base(), "TR-assign_slot",
+                            {"offDuty": off_duty, "slots": slots}, {"slot": slot})
+
+    def test_off_duty_guard_fires_first(self):
+        # Off duty wins even when the slot is also a duplicate (guard order).
+        self.assertEqual(self.run_assign(True, [3], 3), ({"offDuty": True, "slots": [3]}, "off_duty"))
+
+    def test_duplicate(self):
+        self.assertEqual(self.run_assign(False, [3], 3), ({"offDuty": False, "slots": [3]}, "duplicate"))
+
+    def test_accept_prepends(self):
+        self.assertEqual(self.run_assign(False, [3], 4), ({"offDuty": False, "slots": [4, 3]}, "accepted"))
+
+    def test_input_state_not_mutated(self):
+        state = {"offDuty": False, "slots": [1]}
+        irc.run_step(base(), "TR-assign_slot", state, {"slot": 2})
+        self.assertEqual(state, {"offDuty": False, "slots": [1]})
+
+    def test_effects_are_simultaneous(self):
+        ir = base()
+        ir["state_vars"].append({"name": "last", "type": "List Nat"})
+        # Both right-hand sides must see the PRE-state value of `slots`.
+        ir["transitions"][0]["otherwise"]["effect"].append({"var": "last", "value": {"var": "slots"}})
+        new, _ = irc.run_step(ir, "TR-assign_slot", {"offDuty": False, "slots": [1], "last": []}, {"slot": 2})
+        self.assertEqual(new["slots"], [2, 1])
+        self.assertEqual(new["last"], [1])
+
+    def test_invariant(self):
+        self.assertTrue(irc.holds(base(), "INV-001", {"offDuty": False, "slots": [1, 2]}))
+        self.assertFalse(irc.holds(base(), "INV-001", {"offDuty": False, "slots": [2, 2]}))
+
+    def test_unknown_transition(self):
+        with self.assertRaises(irc.IRError):
+            irc.run_step(base(), "TR-nope", {}, {})
 
 
 if __name__ == "__main__":
