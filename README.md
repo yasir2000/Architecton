@@ -1,2 +1,2 @@
-# architecton-
-Technē (τέχνη): The closest ancient Greek equivalent to the applied craft of engineering and design. It refers to a reasoned art, craft, or systematic skill of making something. Philosophers like Aristotle contrasted technē (knowledge tied to production and-mutable things) with episteme (pure universal science)
+#Architektōn (ἀρχιτέκτων):
+Literally the "master builder" or "chief carpenter" (the root of architect and tectonic). This person was responsible for understanding the overall vision, requirements, and execution of large-scale physical projects like temples or aqueducts.
