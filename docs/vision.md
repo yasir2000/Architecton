@@ -24,3 +24,8 @@ Can a change to a human business intention be expressed in a typed semantic mode
 - **M5 — assurance evidence:** proof certificates, artifacts, reproducible releases and continuous production checking.
 
 This is a research agenda. No stage beyond M0 is implemented merely because it appears in the diagram.
+
+## Process-level RUP formalization — implemented as an independent module
+
+The [formal RUP lifecycle module](../packages/lifecycle/README.md) provides typed phase/iteration/baseline semantics, generated evidence-gate conditions, proof obligations, and a conservative evidence-invalidation rule on requirements changes. It is an **M1 process-model slice**, not a completed typed requirements IR or a verified production workflow engine. See the [methodology](methodology-rup-formal.md).
+

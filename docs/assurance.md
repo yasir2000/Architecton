@@ -16,3 +16,9 @@
 Lean proof files contain no project-specific axioms or `sorry` by design. Proofs are authoritative only if successfully checked with the pinned Lean toolchain. A GitHub Actions workflow is provided to run the checks; this staging environment could only run the Python generator and scenario validator.
 
 The sample API is educational. It lacks authentication, authorization and abuse protection, and must remain loopback-only.
+
+## Formal RUP lifecycle assurance (separate from DriverPass domain proofs)
+
+The `packages/lifecycle` module defines Lean 4 theorem obligations for safe promotions, no phase skipping, blocked-state immutability, baseline revision invalidation, and the construction release gate. It includes 12 Python reference scenarios and a bounded sweep of 1,024 phase/evidence states. **Theorem proofs are not kernel-confirmed until the pinned Lean CI job completes successfully.**
+
+An external authority is assumed to provide trustworthy `recordValidated` evidence. The module itself neither authenticates the attester nor checks proofs, source hashes, signed attestations, build provenance, deployment health, or cross-language compiler refinement. The model is an educational verification process, not a production compliance controller.
