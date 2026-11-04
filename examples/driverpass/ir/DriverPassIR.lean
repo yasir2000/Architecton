@@ -1,6 +1,6 @@
 import ArtifactIR
 
-/-! Auto-generated from examples/driverpass/ir/driverpass.ir.json (IR digest 7992c7bd4afa8b54).
+/-! Auto-generated from examples/driverpass/ir/driverpass.ir.json (IR digest f06cc1f031603334).
 DO NOT EDIT: python3 packages/ir/scripts/irc.py lean --write examples/driverpass/ir/driverpass.ir.json ...
 The theorem below is checked by the Lean kernel by evaluation (`decide`):
 it establishes that this IR instance satisfies `wellFormed`. -/
@@ -21,9 +21,9 @@ def driverPass : Model where
     { id := "BR-001", kind := .business, goals := ["G1"], provenance := [⟨"ART-REFINEMENT", "theorem ir_refines_allocate", .proof⟩, ⟨"ART-RUST-ORACLE", "fn rust_matches_ir_oracle", .test⟩, ⟨"ART-POLICY", "BR-001", .source⟩, ⟨"ART-LEAN-PROOFS", "theorem offDuty_denied", .proof⟩, ⟨"ART-RUST-DOMAIN", "pub fn allocate", .implementation⟩, ⟨"ART-SCENARIOS", "off_duty", .test⟩] },
     { id := "BR-002", kind := .business, goals := ["G2"], provenance := [⟨"ART-REFINEMENT", "theorem ir_refines_allocate", .proof⟩, ⟨"ART-RUST-ORACLE", "fn rust_matches_ir_oracle", .test⟩, ⟨"ART-POLICY", "BR-002", .source⟩, ⟨"ART-LEAN-PROOFS", "theorem duplicate_denied", .proof⟩, ⟨"ART-RUST-DOMAIN", "pub fn allocate", .implementation⟩, ⟨"ART-SCENARIOS", "duplicate", .test⟩] },
     { id := "BR-003", kind := .business, goals := ["G3"], provenance := [⟨"ART-REFINEMENT", "theorem ir_refines_allocate", .proof⟩, ⟨"ART-RUST-ORACLE", "fn rust_matches_ir_oracle", .test⟩, ⟨"ART-POLICY", "BR-003", .source⟩, ⟨"ART-LEAN-PROOFS", "theorem accepted_prepends_slot", .proof⟩, ⟨"ART-RUST-DOMAIN", "pub fn allocate", .implementation⟩, ⟨"ART-SCENARIOS", "accepted", .test⟩] },
-    { id := "SR-001", kind := .nonfunctional, goals := ["G4"], provenance := [⟨"ART-REFINEMENT", "theorem ir_refines_allocate", .proof⟩, ⟨"ART-RUST-ORACLE", "fn rust_matches_ir_oracle", .test⟩, ⟨"ART-POLICY", "SR-001", .source⟩, ⟨"ART-LEAN-PROOFS", "theorem rejected_preserves_roster", .proof⟩, ⟨"ART-RUST-DOMAIN", "pub fn allocate", .implementation⟩] },
-    { id := "SR-002", kind := .nonfunctional, goals := ["G5"], provenance := [⟨"ART-POLICY", "SR-002", .source⟩, ⟨"ART-SEQUENCE-UML", "BEGIN IMMEDIATE", .design⟩, ⟨"ART-RUST-API", "async fn assign_slot", .implementation⟩, ⟨"ART-SMOKE", "\"POST\", \"/api/v1/instructors/7/slots\"", .test⟩] },
-    { id := "SR-003", kind := .nonfunctional, goals := ["G6"], provenance := [⟨"ART-POLICY", "SR-003", .source⟩, ⟨"ART-RUST-API", "audit", .implementation⟩, ⟨"ART-SMOKE", "audit", .test⟩] }
+    { id := "SR-001", kind := .nonfunctional, goals := ["G4"], provenance := [⟨"ART-LEAN-TX", "theorem tx_rejected_keeps_allocations", .proof⟩, ⟨"ART-RUST-TX-TESTS", "fn every_injected_fault_rolls_back_completely", .test⟩, ⟨"ART-REFINEMENT", "theorem ir_refines_allocate", .proof⟩, ⟨"ART-RUST-ORACLE", "fn rust_matches_ir_oracle", .test⟩, ⟨"ART-POLICY", "SR-001", .source⟩, ⟨"ART-LEAN-PROOFS", "theorem rejected_preserves_roster", .proof⟩, ⟨"ART-RUST-DOMAIN", "pub fn allocate", .implementation⟩] },
+    { id := "SR-002", kind := .nonfunctional, goals := ["G5"], provenance := [⟨"ART-LEAN-TX", "theorem run_no_double_booking", .proof⟩, ⟨"ART-RUST-SERVICE", "TransactionBehavior::Immediate", .implementation⟩, ⟨"ART-RUST-TX-TESTS", "fn concurrent_connections_never_double_book", .test⟩, ⟨"ART-RUST-TX-TESTS", "fn all_request_sequences_up_to_length_4_match_reference", .test⟩, ⟨"ART-POLICY", "SR-002", .source⟩, ⟨"ART-SEQUENCE-UML", "BEGIN IMMEDIATE", .design⟩, ⟨"ART-RUST-API", "async fn assign_slot", .implementation⟩, ⟨"ART-SMOKE", "\"POST\", \"/api/v1/instructors/7/slots\"", .test⟩] },
+    { id := "SR-003", kind := .nonfunctional, goals := ["G6"], provenance := [⟨"ART-LEAN-TX", "theorem tx_audits_exactly_once", .proof⟩, ⟨"ART-RUST-SERVICE", "INSERT INTO allocation_audit", .implementation⟩, ⟨"ART-RUST-TX-TESTS", "fn each_committed_request_audits_exactly_once", .test⟩, ⟨"ART-POLICY", "SR-003", .source⟩, ⟨"ART-RUST-API", "audit", .implementation⟩, ⟨"ART-SMOKE", "audit", .test⟩] }
   ]
   risks := [
     { id := "RK-001", status := .mitigated, mitigatedBy := ["SR-002"], provenance := [⟨"ART-GOALS", "G5 (SR-002)", .design⟩] },
@@ -58,11 +58,14 @@ def driverPass : Model where
     { id := "ART-LEAN-SPEC", path := "examples/driverpass/formal/DriverPass.lean", sha256 := "450346a32ac2feb712834de529c3d3d2226969e11261dc5b162738b49782ef0a" },
     { id := "ART-LEAN-PROOFS", path := "examples/driverpass/formal/Proofs.lean", sha256 := "645b866b92774837bdfd8c80a30c053245c6d776742754985aad24f05da83f2a" },
     { id := "ART-RUST-DOMAIN", path := "examples/driverpass/backend/src/domain.rs", sha256 := "ce92a0c2005c99603ffe8322c327c889a36c132c2cc8d2a45d47f046f2379211" },
-    { id := "ART-RUST-API", path := "examples/driverpass/backend/src/main.rs", sha256 := "c5364cf6281323e682146e85918e867c8d9b010d87bb055c80cbf074ee5bb73d" },
+    { id := "ART-RUST-API", path := "examples/driverpass/backend/src/main.rs", sha256 := "c45810d6c014c53ffb60b08c28e0f0067eb9f897ede62ce09119c72eb4fd4d39" },
     { id := "ART-SCENARIOS", path := "examples/driverpass/contracts/scenarios.json", sha256 := "3d0a02f0fad70f8eb3f18e8d4e125289b13ac8ecc17f8fc68b647e87a7846bc4" },
     { id := "ART-SMOKE", path := "examples/driverpass/scripts/smoke.py", sha256 := "2ea656ed0e188c73a0add4755c3d69b0effa06f720144fd560892eb20832fb95" },
     { id := "ART-REFINEMENT", path := "examples/driverpass/ir/Refinement.lean", sha256 := "2c9fb2dc879ab28abc6c2e816e2c3913dac71500b4d7b781cf6dc07aa7904b3f" },
-    { id := "ART-RUST-ORACLE", path := "examples/driverpass/backend/tests/oracle.rs", sha256 := "42df6ef5214665b85fada3c557090efe6204f14bb5a88fb7e02794073ff1297f" }
+    { id := "ART-RUST-ORACLE", path := "examples/driverpass/backend/tests/oracle.rs", sha256 := "42df6ef5214665b85fada3c557090efe6204f14bb5a88fb7e02794073ff1297f" },
+    { id := "ART-LEAN-TX", path := "examples/driverpass/formal/Transactions.lean", sha256 := "38a4fe5b1993f5f72d2403b0c6aec3a3a6ff94c2e288232f2a1c06e32ba197fc" },
+    { id := "ART-RUST-SERVICE", path := "examples/driverpass/backend/src/service.rs", sha256 := "406f44b1ea5d9445e0354933172c046679e76ca2695153562d925e072d79ce89" },
+    { id := "ART-RUST-TX-TESTS", path := "examples/driverpass/backend/tests/transactions.rs", sha256 := "fbea7f33dba08960b8b2079858d5f0997e3b1811a3d69b49c973eebfbcfc1707" }
   ]
 
 theorem driverPass_wellFormed : wellFormed driverPass = true := by decide
