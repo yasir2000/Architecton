@@ -1,7 +1,12 @@
-# Future shared Architecton packages
+# Architecton packages
 
-This directory is reserved for the planned **typed requirements IR**, **semantic model transformations**, **proof obligation generation**, **model-to-code refinement**, and **runtime conformance evidence**. They are not yet implemented. The end-to-end working slice is in `../examples/driverpass`.
+Shared tooling for the [research roadmap](../README.md#research-roadmap-next-work-packages). The end-to-end working slice is in `../examples/driverpass`.
 
-## Implemented process package
+## Implemented packages
 
-- [`lifecycle/`](lifecycle/README.md) — Lean-based RUP lifecycle, generated policy gates, proof obligations, scenarios and CI.
+- [`ir/`](ir/README.md): typed artifact IR v1. Goals, requirements, risks, typed state transitions, invariants, provenance anchors and artifact hashes, checked by a Python validator and by the Lean kernel.
+- [`lifecycle/`](lifecycle/README.md): Lean-based RUP lifecycle, generated policy gates, proof obligations, scenarios and CI.
+
+## Planned, not yet implemented
+
+Trusted evidence ledger, design refinements, cross-language conformance (model-to-code refinement), and temporal/runtime verification.
