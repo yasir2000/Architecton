@@ -1,0 +1,8 @@
+# Validators whose signed evidence this repository trusts.
+# One line per key, in ssh-keygen ALLOWED SIGNERS format:
+#   <principal> <key-type> <public-key>
+# Example (do not uncomment; generate your own with ssh-keygen -t ed25519):
+#   ci@github-actions ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA...
+#
+# Adding or removing a line changes who can produce valid evidence, so
+# review changes to this file like changes to access control.
