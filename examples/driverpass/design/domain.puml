@@ -1,0 +1,36 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+class InstructorRoster <<Domain>> {
+  +instructorId: Integer
+  +offDuty: Boolean
+  +slots: List<Integer>
+}
+class AssignSlot <<Command>> {
+  +instructorId: Integer
+  +slotId: Integer
+}
+enum Decision {
+  accepted
+  off_duty
+  duplicate
+}
+class AllocationService <<Application>> {
+  +allocate(roster, slot): (roster, decision)
+}
+class AllocationRepository <<Infrastructure>> {
+  +loadRoster(id)
+  +saveAssignment(id, slot)
+  +writeAudit(id, slot, decision)
+}
+AssignSlot --> AllocationService
+AllocationService --> InstructorRoster
+AllocationService --> Decision
+AllocationService --> AllocationRepository : atomic transaction
+note right of AllocationService
+BR-001: offDuty => reject
+BR-002: contains(slot) => reject
+BR-003: otherwise prepend slot
+SR-001: rejection preserves roster
+end note
+@enduml

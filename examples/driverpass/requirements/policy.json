@@ -1,0 +1,31 @@
+{
+  "name": "DriverPass minimal instructor-slot allocation",
+  "version": "1.0.0",
+  "workflow": "assign_slot",
+  "entity": "InstructorRoster",
+  "ordered_guards": [
+    {
+      "requirement_id": "BR-001",
+      "predicate": "off_duty",
+      "decision": "off_duty",
+      "meaning": "Reject assignment if the instructor is off duty."
+    },
+    {
+      "requirement_id": "BR-002",
+      "predicate": "slot_exists",
+      "decision": "duplicate",
+      "meaning": "Reject assignment if this instructor already holds this slot."
+    }
+  ],
+  "otherwise": {
+    "requirement_id": "BR-003",
+    "decision": "accepted",
+    "effect": "prepend_slot",
+    "meaning": "Accept and prepend a previously unassigned slot."
+  },
+  "nonfunctional_requirements": [
+    {"id": "SR-001", "meaning": "No rejected assignment may mutate the roster."},
+    {"id": "SR-002", "meaning": "Each API request is executed in one SQLite IMMEDIATE transaction."},
+    {"id": "SR-003", "meaning": "Every attempted assignment of a known instructor is recorded in durable audit history."}
+  ]
+}

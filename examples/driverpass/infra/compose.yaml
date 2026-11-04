@@ -1,0 +1,14 @@
+services:
+  driverpass:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - driverpass_data:/data
+    environment:
+      PORT: "3000"
+      DATABASE_PATH: /data/driverpass.db
+volumes:
+  driverpass_data:
