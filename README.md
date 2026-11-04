@@ -149,4 +149,10 @@ _ἀρχιτέκτων_: the master builder, responsible for unifying vision, st
 
 Copyright (C) 2026 Yasir Karam
 
-Architecton is licensed under the [GNU Affero General Public License v3.0](LICENSE) (SPDX: `AGPL-3.0-only`). If you modify it and let others use it over a network, you must offer them the corresponding source code.
+Architecton is **source-available, not open source**, under the [Architecton Source-Available License 1.0](LICENSE):
+
+- **Commercial use is not allowed.**
+- **Academic use** (teaching, coursework, research, publications) **is not allowed without the author's prior written permission.**
+- Viewing and running the code for personal evaluation is allowed. Modifying, redistributing or building on it needs written permission.
+
+To request permission, contact Yasir Karam at [yasirkaram@gmail.com](mailto:yasirkaram@gmail.com).
