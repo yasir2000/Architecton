@@ -2,6 +2,8 @@
 
 This is a documented mapping, **not** a certified ArchiMate interchange file.
 
+> **Superseded as the source of truth** by the typed model [architecture.json](architecture.json), which `packages/design/scripts/designc.py` checks against a subset of the ArchiMate 3.2 relationship rules, the IR requirements and the code. This table remains as a readable summary.
+
 | Architecture layer | Modeling element | POC realization | Trace |
 |---|---|---|---|
 | Motivation | Business requirement | BR-001–BR-003 in `requirements/policy.json` | Guards / final effect |

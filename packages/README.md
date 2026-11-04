@@ -5,9 +5,10 @@ Shared tooling for the [research roadmap](../README.md#research-roadmap-next-wor
 ## Implemented packages
 
 - [`ir/`](ir/README.md): typed artifact IR v1. Goals, requirements, risks, typed state transitions, invariants, provenance anchors and artifact hashes, checked by a Python validator and by the Lean kernel.
+- [`design/`](design/README.md): design refinements. UML state, sequence and class diagrams and a typed ArchiMate model, checked against the formal models, IR and code, with a Lean proof that the phase state diagram matches the lifecycle model.
 - [`ledger/`](ledger/README.md): trusted evidence ledger. Content-addressed, SSH-signed check results with a dependency graph, revocation and scoped re-verification, backed by a Lean theorem on revocation scope.
 - [`lifecycle/`](lifecycle/README.md): Lean-based RUP lifecycle, generated policy gates, proof obligations, scenarios and CI.
 
 ## Planned, not yet implemented
 
-Design refinements, cross-language conformance (model-to-code refinement), and temporal/runtime verification.
+Temporal/runtime verification. (Cross-language conformance is implemented for DriverPass inside `ir/` and `examples/driverpass/`.)

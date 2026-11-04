@@ -119,6 +119,7 @@ Architecton/
   docs/                          Vision, assurance boundary, milestones
   packages/ir/                   Typed artifact IR: checker, Lean semantics and proofs
   packages/ledger/               Signed evidence ledger and its Lean revocation theorems
+  packages/design/               Design-model checker: UML subsets, ArchiMate rules, Lean diagram proof
   packages/lifecycle/            Formal RUP methodology and Lean phase-gate verification
   examples/driverpass/
     ir/                          DriverPass IR instance and its generated Lean model
@@ -146,11 +147,11 @@ These two pre-existing Lean files are complementary to, but independent of, the 
 
 ## Research roadmap: next work packages
 
-The typed artifact IR and the evidence ledger have working v1s, and cross-language conformance is implemented for the DriverPass slice. The rest are planned and not yet implemented; see the [milestones](docs/vision.md#milestones).
+The typed artifact IR, the evidence ledger and design refinements have working v1s, and cross-language conformance is implemented for the DriverPass slice. The rest are planned and not yet implemented; see the [milestones](docs/vision.md#milestones).
 
 - **Typed artifact IR** (v1 implemented, see [packages/ir](packages/ir/README.md)): goals, requirement statements, risk identifiers, typed state transitions, invariants, provenance anchors and artifact hashes. The DriverPass slice has a [checked IR instance](examples/driverpass/ir/driverpass.ir.json), and the Lean kernel proves it well-formed.
 - **Trusted evidence ledger** (implemented, see [packages/ledger](packages/ledger/README.md)): content-addressed inputs; CI-signed attestations; immutable proof results; validator identity; dependency DAG; revocation and scoped re-verification. Entries are signed with SSH keys; a Lean theorem shows revocation or a changed input invalidates exactly the dependent evidence, and `ledger.py run` re-runs only that. No signing key is configured yet.
-- **Design refinements:** well-formed UML activity/state/sequence subset, executable semantics, ArchiMate architecture constraints and trace relations.
+- **Design refinements** (implemented for the existing diagrams, see [packages/design](packages/design/README.md)): well-formed UML activity/state/sequence subset, executable semantics, ArchiMate architecture constraints and trace relations. The state, sequence and class diagrams and a typed ArchiMate model are checked against the formal models, IR and code. A Lean proof shows the phase state diagram behaves exactly like the lifecycle model. No activity diagram exists yet.
 - **Cross-language conformance** (DriverPass slice implemented, see [packages/ir](packages/ir/README.md#cross-language-conformance-driverpass) and [assurance](docs/assurance.md)): Lean ↔ Rust reference equivalence, SQLite transaction models, test oracle generation, failure injection and systematic bounded checking. Done so far:
   - a Lean proof that the DriverPass IR transition equals the Lean `allocate` for all inputs;
   - 850 kernel-checked oracle vectors, replayed against Rust;

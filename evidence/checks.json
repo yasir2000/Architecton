@@ -99,7 +99,8 @@
       "argv": ["python3", "packages/ledger/scripts/lean_build.py", "--path", "packages/lifecycle/formal",
                "packages/lifecycle/formal/ArchitectonLifecycle.lean", "packages/lifecycle/formal/Policy.lean",
                "packages/lifecycle/formal/StateMachine.lean", "packages/lifecycle/formal/Proofs.lean",
-               "packages/lifecycle/formal/Scenarios.lean"],
+               "packages/lifecycle/formal/Scenarios.lean",
+               "packages/lifecycle/formal/PhaseDiagram.lean"],
       "inputs": ["packages/lifecycle/formal/*.lean", "packages/lifecycle/lean-toolchain",
                  "packages/ledger/scripts/lean_build.py"]
     },
@@ -110,6 +111,22 @@
                "packages/ledger/formal/Ledger.lean"],
       "inputs": ["packages/ledger/formal/*.lean", "packages/ledger/lean-toolchain",
                  "packages/ledger/scripts/lean_build.py"]
+    },
+    {
+      "id": "design-check",
+      "description": "Design models conform to the formal models, IR and code",
+      "argv": ["python3", "packages/design/scripts/designc.py", "check",
+               "packages/lifecycle/design/conformance.json", "examples/driverpass/design/conformance.json"],
+      "inputs": [
+        "packages/design/scripts/designc.py", "packages/design/tests/*.py",
+        "packages/lifecycle/design/*", "packages/lifecycle/requirements/policy.json",
+        "packages/lifecycle/formal/PhaseDiagram.lean",
+        "examples/driverpass/design/*", "examples/driverpass/ir/driverpass.ir.json",
+        "examples/driverpass/backend/src/*.rs", "examples/driverpass/backend/Cargo.toml",
+        "examples/driverpass/formal/*.lean", "examples/driverpass/contracts/openapi.yaml",
+        "examples/driverpass/infra/Dockerfile"
+      ],
+      "depends_on": ["ir-check", "lean-lifecycle"]
     },
     {
       "id": "ledger-unit",
