@@ -1,0 +1,19 @@
+@startuml
+actor Client
+participant "Axum API" as API
+participant "Domain allocate" as Domain
+database "SQLite" as DB
+Client -> API: POST /api/v1/instructors/7/slots {slot_id:42}
+API -> DB: BEGIN IMMEDIATE
+API -> DB: Read roster
+API -> Domain: allocate(roster,42)
+Domain --> API: (nextRoster, decision)
+alt accepted
+  API -> DB: INSERT allocation
+else rejected
+  note over API: No allocation row is changed
+end
+API -> DB: INSERT audit decision
+API -> DB: COMMIT
+API --> Client: 201 accepted / 409 rejected
+@enduml

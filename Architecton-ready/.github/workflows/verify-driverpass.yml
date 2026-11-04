@@ -1,0 +1,46 @@
+name: Verify DriverPass requirements-to-runtime PoC
+on:
+  push:
+    paths:
+      - 'examples/driverpass/**'
+      - '.github/workflows/verify-driverpass.yml'
+  pull_request:
+    paths:
+      - 'examples/driverpass/**'
+      - '.github/workflows/verify-driverpass.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/driverpass
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check generated Lean/Rust adapters
+        run: python3 scripts/generate.py --check
+      - name: Sanity-check policy scenarios (Python)
+        run: python3 scripts/check_contracts.py
+      - name: Install Lean 4 via elan
+        run: |
+          curl -fsSL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel-check formal transition, theorems and examples
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          LEAN_PATH=formal lean -o formal/DriverPass.olean formal/DriverPass.lean
+          LEAN_PATH=formal lean formal/Proofs.lean
+          LEAN_PATH=formal lean formal/Scenarios.lean
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run Rust semantic contract tests
+        run: cargo test --manifest-path backend/Cargo.toml
+      - name: Compile and test HTTP/SQLite
+        run: |
+          cargo build --manifest-path backend/Cargo.toml
+          python3 scripts/smoke.py backend/target/debug/driverpass-poc
+      - name: Build example OCI image
+        run: docker build -f infra/Dockerfile .

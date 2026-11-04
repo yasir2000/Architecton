@@ -1,0 +1,37 @@
+[
+  {
+    "name": "off-duty instructor is rejected",
+    "requirement_ids": ["BR-001", "SR-001"],
+    "before": {"off_duty": true, "slots": [10]},
+    "slot_id": 11,
+    "expected": {"decision": "off_duty", "roster": {"off_duty": true, "slots": [10]}}
+  },
+  {
+    "name": "existing slot is rejected",
+    "requirement_ids": ["BR-002", "SR-001"],
+    "before": {"off_duty": false, "slots": [10, 9]},
+    "slot_id": 10,
+    "expected": {"decision": "duplicate", "roster": {"off_duty": false, "slots": [10, 9]}}
+  },
+  {
+    "name": "free slot is assigned",
+    "requirement_ids": ["BR-003"],
+    "before": {"off_duty": false, "slots": [10, 9]},
+    "slot_id": 11,
+    "expected": {"decision": "accepted", "roster": {"off_duty": false, "slots": [11, 10, 9]}}
+  },
+  {
+    "name": "empty roster is assigned",
+    "requirement_ids": ["BR-003"],
+    "before": {"off_duty": false, "slots": []},
+    "slot_id": 1,
+    "expected": {"decision": "accepted", "roster": {"off_duty": false, "slots": [1]}}
+  },
+  {
+    "name": "off-duty policy precedes duplication",
+    "requirement_ids": ["BR-001", "BR-002"],
+    "before": {"off_duty": true, "slots": [10]},
+    "slot_id": 10,
+    "expected": {"decision": "off_duty", "roster": {"off_duty": true, "slots": [10]}}
+  }
+]

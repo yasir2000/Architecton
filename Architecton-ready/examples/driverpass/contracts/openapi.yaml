@@ -1,0 +1,60 @@
+openapi: 3.1.0
+info:
+  title: DriverPass minimal verified-allocation PoC
+  version: 0.1.0
+  description: Educational API; no authentication. Do not expose publicly.
+paths:
+  /health:
+    get:
+      summary: Liveness
+      responses:
+        '200': {description: Alive}
+  /api/v1/instructors/{id}:
+    get:
+      summary: Read instructor roster
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: integer}}
+      responses:
+        '200': {description: Instructor roster}
+        '404': {description: Unknown instructor}
+  /api/v1/instructors/{id}/duty:
+    patch:
+      summary: Set off-duty flag
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: integer}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [off_duty]
+              properties:
+                off_duty: {type: boolean}
+      responses:
+        '200': {description: Updated roster}
+        '404': {description: Unknown instructor}
+  /api/v1/instructors/{id}/slots:
+    post:
+      summary: Assign a slot by the verified decision-table policy
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: integer}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slot_id]
+              properties:
+                slot_id: {type: integer, minimum: 0, maximum: 9223372036854775807}
+      responses:
+        '201': {description: Accepted}
+        '409': {description: Off duty or duplicate}
+        '404': {description: Unknown instructor}
+        '400': {description: Invalid slot}
+  /api/v1/audit:
+    get:
+      summary: Last 50 assignment attempts
+      responses:
+        '200': {description: Audit entries}

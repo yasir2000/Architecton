@@ -1,0 +1,7 @@
+backend/target/
+backend/Cargo.lock
+formal/*.olean
+*.db
+*.db-shm
+*.db-wal
+__pycache__/
