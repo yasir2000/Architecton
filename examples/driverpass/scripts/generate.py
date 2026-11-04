@@ -19,8 +19,8 @@ def lean_roster(s):
 
 def generate():
     policy_file = ROOT / "requirements/policy.json"
-    policy = json.loads(policy_file.read_text())
-    scenarios = json.loads((ROOT / "contracts/scenarios.json").read_text())
+    policy = json.loads(policy_file.read_text(encoding="utf-8"))
+    scenarios = json.loads((ROOT / "contracts/scenarios.json").read_text(encoding="utf-8"))
     guards = policy["ordered_guards"]
     guard_pairs = [(g["predicate"], g["decision"]) for g in guards]
     # This explicit vocabulary is the POC's typed semantic subset. Unknown words fail hard.
@@ -33,7 +33,8 @@ def generate():
         raise ValueError("Unsupported terminal effect: semantic mapping requires review")
     if policy["entity"] != "InstructorRoster" or policy["workflow"] != "assign_slot":
         raise ValueError("Unsupported entity or workflow")
-    digest = hashlib.sha256(policy_file.read_bytes()).hexdigest()[:16]
+    # Hash with LF line endings so Windows (CRLF) and Linux checkouts agree.
+    digest = hashlib.sha256(policy_file.read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:16]
     lean = f'''/- Auto-generated from requirements/policy.json (SHA-256 prefix {digest}).
    DO NOT EDIT: python3 scripts/generate.py -/
 
@@ -112,14 +113,14 @@ def main():
     args = parser.parse_args()
     generated = generate()
     stale = [str(path.relative_to(ROOT)) for path, content in generated.items()
-             if not path.exists() or path.read_text() != content]
+             if not path.exists() or path.read_text(encoding="utf-8") != content]
     if args.check:
         if stale:
             raise SystemExit("Generated files drifted: " + ", ".join(stale))
         print("All generated policy adapters and Lean scenarios are up-to-date.")
     else:
         for path, content in generated.items():
-            path.write_text(content)
+            path.write_text(content, encoding="utf-8", newline="\n")
             print("Generated", path.relative_to(ROOT))
 
 

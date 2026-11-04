@@ -1,8 +1,9 @@
+import ArchitectonLifecycle
+
 /-! Auto-generated from requirements/policy.json (SHA-256 prefix 5bd4fdad25a5b213).
 DO NOT EDIT: python3 scripts/generate_policy.py --write
 The gate encodes reviewed policy conditions; it is not itself a proof
 that an actual artifact was verified by a trusted system. -/
-import ArchitectonLifecycle
 namespace Architecton.Lifecycle
 
 /-- Decidable phase-promotion gate under the reviewed policy. -/

@@ -14,7 +14,8 @@ theorem duplicate_denied (s : Roster) (slot : Nat)
     (hd : s.offDuty = false)
     (hc : s.slots.contains slot = true) :
     allocate s slot = (s, Decision.duplicate) := by
-  simp [allocate, hd, hc]
+  have hm : slot ∈ s.slots := by simpa using hc
+  simp [allocate, hd, hm]
 
 -- SR-001: Every non-successful transition preserves the entire roster.
 theorem rejected_preserves_roster (s : Roster) (slot : Nat)
@@ -24,8 +25,12 @@ theorem rejected_preserves_roster (s : Roster) (slot : Nat)
   | true => simp [allocate, hd]
   | false =>
       cases hc : s.slots.contains slot with
-      | true => simp [allocate, hd, hc]
-      | false => simp [allocate, hd, hc] at h
+      | true =>
+          have hm : slot ∈ s.slots := by simpa using hc
+          simp [allocate, hd, hm]
+      | false =>
+          have hm : slot ∉ s.slots := by simpa using hc
+          simp [allocate, hd, hm] at h
 
 -- BR-003: A successful transition prepends exactly the requested slot.
 theorem accepted_prepends_slot (s : Roster) (slot : Nat)
@@ -35,5 +40,9 @@ theorem accepted_prepends_slot (s : Roster) (slot : Nat)
   | true => simp [allocate, hd] at h
   | false =>
       cases hc : s.slots.contains slot with
-      | true => simp [allocate, hd, hc] at h
-      | false => simp [allocate, hd, hc]
+      | true =>
+          have hm : slot ∈ s.slots := by simpa using hc
+          simp [allocate, hd, hm] at h
+      | false =>
+          have hm : slot ∉ s.slots := by simpa using hc
+          simp [allocate, hd, hm]
