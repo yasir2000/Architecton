@@ -6,6 +6,54 @@ Architecton explores semantics-preserving refinement from stakeholder intentions
 
 > **Status: research proof of concept, not a verified production system.** The runnable example is deliberately narrow. It proves properties of a Lean 4 *model*; matching a compiled implementation and its deployment to that model is separately tested, not universally proved.
 
+## At a glance
+
+### Why
+
+Requirements, designs, proofs and running code usually drift apart. A business rule written in a BRD gets reinterpreted in a UML diagram, then re-implemented in code, and nobody can show that the deployed system still means what the stakeholder intended. Architecton asks whether that chain can carry **explicit, machine-checkable evidence of semantics preservation** at every step, and is honest about where the evidence stops.
+
+### What
+
+A research proof of concept that links one chain of artifacts end to end:
+
+- stakeholder intentions and requirements (BRD, SRS, goals) normalized into a policy decision table;
+- design views (UML, ArchiMate-inspired mapping) and requirement-to-artifact traceability;
+- a Lean 4 formal model with kernel-checked theorems (no project-specific axioms or `sorry`);
+- a Rust domain implementation and Axum/SQLite REST service checked against the same shared scenarios;
+- Docker packaging and CI that re-run every check.
+
+The current working slice is the **DriverPass instructor/lesson slot assignment** workflow. Reusable tooling (typed IR, model transformations, refinement proofs) is planned in [packages/](packages/README.md) but not yet implemented.
+
+### When
+
+- **Now (M0):** the DriverPass vertical slice is implemented and is the only completed milestone.
+- **Next (M1–M5):** typed IR, multiple model projections, refinement proofs, infrastructure verification and assurance evidence. See the [roadmap](docs/vision.md#milestones).
+- **Use it when** you want a worked example of tracing a business rule through formal proof to an executable service, or a starting point for research on requirements-to-code refinement. **Don't use it** as production software: the sample API has no authentication and must stay loopback-only.
+
+### How
+
+1. Analysts review intentions and requirements and resolve ambiguity.
+2. The rules are captured once in a normalized policy ([policy.json](examples/driverpass/requirements/policy.json)).
+3. A generator derives the Lean and Rust artifacts from that policy and checks they stay consistent.
+4. Lean proves the model's properties; Rust tests and HTTP smoke tests check the implementation against shared scenarios.
+5. CI ([verify-driverpass.yml](.github/workflows/verify-driverpass.yml)) runs all of it on every change.
+
+The [engineering pipeline](#engineering-pipeline) and [quick checks](#quick-checks) below give the detail; [assurance limits](docs/assurance.md) list what each check does and does not prove.
+
+### Who
+
+- **Author and maintainer:** Yasir Karam ([yasir2000](https://github.com/yasir2000)).
+- **Intended readers:** software architects, requirements engineers, formal-methods researchers and students who want to connect business requirements, design models and verified code.
+- **Roles in the pipeline:** stakeholders state intentions, an analyst reviews and approves the normalized requirements, and the toolchain (Lean kernel, Rust tests, CI) produces the evidence.
+
+### Where
+
+- **Repository:** [github.com/yasir2000/Architecton](https://github.com/yasir2000/Architecton).
+- **Working example:** [examples/driverpass/](examples/driverpass/README.md).
+- **Source BRD and design documents:** repository root (see [below](#existing-brd-uml-design-and-broader-lean-formalizations)).
+- **Vision, assurance boundary and integration status:** [docs/](docs/).
+- **Runtime:** locally, or in a local Docker container from `examples/driverpass`; not meant for public deployment.
+
 ## Engineering pipeline
 
 ```text
