@@ -39,16 +39,19 @@ def load_policy():
             raise ValueError(f"Unknown evidence kind in {phase}")
     if any(not rules[p] for p in PHASES[:-1]) or rules["transition"]:
         raise ValueError("Each nonterminal phase needs evidence; transition has no successor")
-    return obj, hashlib.sha256(raw).hexdigest()[:16]
+    # Hash with LF line endings so Windows (CRLF) and Linux checkouts agree.
+    return obj, hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest()[:16]
 
 
 def generate(obj, digest):
     lines = [
+        # Lean requires `import` before any `/-! ... -/` module doc comment.
+        "import ArchitectonLifecycle",
+        "",
         f"/-! Auto-generated from requirements/policy.json (SHA-256 prefix {digest}).",
         "DO NOT EDIT: python3 scripts/generate_policy.py --write",
         "The gate encodes reviewed policy conditions; it is not itself a proof",
         "that an actual artifact was verified by a trusted system. -/",
-        "import ArchitectonLifecycle",
         "namespace Architecton.Lifecycle",
         "",
         "/-- Decidable phase-promotion gate under the reviewed policy. -/",
@@ -84,9 +87,9 @@ def main():
     output = ROOT / "formal/Policy.lean"
     expected = generate(obj, digest)
     if args.write:
-        output.write_text(expected)
+        output.write_text(expected, encoding="utf-8", newline="\n")
         print(f"WROTE {output.relative_to(ROOT)}; policy SHA-256 prefix {digest}")
-    elif not output.exists() or output.read_text() != expected:
+    elif not output.exists() or output.read_text(encoding="utf-8") != expected:
         raise SystemExit("FAIL: generated Lean gate differs from requirements/policy.json")
     else:
         print("PASS: policy schema and generated Lean gate in sync")
