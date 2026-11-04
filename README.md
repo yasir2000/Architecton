@@ -71,6 +71,18 @@ Versioned semantic decision model / typed IR subset
                  Docker image + CI + smoke tests
 ```
 
+
+## Formally governed RUP lifecycle (new process-level PoC)
+
+Architecton extends the four RUP phases—**Inception, Elaboration, Construction, Transition**—with continuous formal specification, proof obligations, model verification, and explicit **evidence-gated iteration**. The cross-cutting verification workflow operates in every phase rather than only after implementation.
+
+- [Formal RUP methodology](docs/methodology-rup-formal.md) and [DriverPass iteration plan](examples/driverpass/lifecycle/iteration-plan.md).
+- [Lifecycle specification, Lean theorems and scenarios](packages/lifecycle/README.md).
+- [Phase-gate source policy](packages/lifecycle/requirements/policy.json), generated [Lean policy](packages/lifecycle/formal/Policy.lean), and [workflow diagrams](packages/lifecycle/design/phase-state-machine.puml).
+- [Lifecycle CI checks](.github/workflows/verify-lifecycle.yml) use Lean kernel checking plus 12 reference scenarios and a 1,024-state bounded sweep.
+
+**Assurance boundary:** Lifecycle theorems prove properties of the abstract process model *assuming trusted verification attestations*. They do not prove that external requirements, designs, binaries, CI jobs, or deployed systems are correct. Changing requirements archives prior approvals and clears current verification evidence.
+
 ## Working example: DriverPass
 
 The first vertical slice is an **instructor/lesson slot assignment workflow**, linked to the provided DriverPass business and UML system design documents. It examines a small set of selected scheduling rules, not all of DriverPass's functionality.
@@ -103,7 +115,8 @@ Requires Python 3, Lean 4 (pinned in `lean-toolchain`), and Rust/Cargo. See the 
 ```text
 Architecton/
   docs/                          Vision, assurance boundary, milestones
-  packages/                      Future shared semantic IR/refinement tooling
+  packages/lifecycle/             Formal RUP methodology and Lean phase-gate verification
+  packages/                      Future semantic IR/refinement tooling
   examples/driverpass/
     requirements/                Normalized policy and traceability
     design/                      Goals, UML and ArchiMate mapping

@@ -1,0 +1,35 @@
+@startuml
+title Architecton — RUP phases with cross-cutting formal workflows
+skinparam shadowing false
+rectangle "RUP phases / iterations" {
+  rectangle "Inception" as Inc
+  rectangle "Elaboration" as Elab
+  rectangle "Construction" as Const
+  rectangle "Transition" as Tran
+  Inc --> Elab : verified exit gate
+  Elab --> Const : verified exit gate
+  Const --> Tran : verified release gate
+}
+rectangle "Cross-cutting workflows (active in every phase)" {
+  rectangle "Business modeling + goal semantics" as W1
+  rectangle "Requirements & traceability" as W2
+  rectangle "Analysis & design (UML, SysML, ArchiMate)" as W3
+  rectangle "Implementation / compilation" as W4
+  rectangle "Testing & runtime conformance" as W5
+  rectangle "Deployment & operations" as W6
+  rectangle "Configuration, change, project, environment" as W7
+  rectangle "FORMAL VERIFICATION (Lean 4, SMT, refinement)" as W8
+}
+W1 ..> Inc
+W2 ..> Elab
+W3 ..> Const
+W4 ..> Const
+W5 ..> Tran
+W6 ..> Tran
+W7 ..> Inc
+W8 ..> Elab
+note bottom of W8
+  This is a process view, not a proof of effort curves
+  or an automatic translation of arbitrary UML.
+end note
+@enduml

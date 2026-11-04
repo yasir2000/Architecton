@@ -1,0 +1,27 @@
+@startuml
+' Formal lifecycle abstraction; matches Policy.lean and StateMachine.lean.
+title Architecton — Proof-oriented RUP Phase State Machine
+hide empty description
+skinparam shadowing false
+[*] --> Inception
+Inception --> Elaboration : promote [requirementsReviewed && traceabilityReviewed]
+Elaboration --> Construction : promote [designReviewed && formalSpecificationChecked]
+Construction --> Transition : promote [proofChecked && conformancePassed && artifactBuilt]
+Inception --> Inception : iterate / iteration++
+Elaboration --> Elaboration : iterate / iteration++
+Construction --> Construction : iterate / iteration++
+Transition --> Transition : iterate / iteration++
+Elaboration --> Inception : reviseRequirements / revision++; archive; invalidate
+Construction --> Inception : reviseRequirements / revision++; archive; invalidate
+Transition --> Inception : reviseRequirements / revision++; archive; invalidate
+Inception --> Inception : reviseRequirements / revision++; archive; invalidate
+note right of Transition
+  Deployment validation is a distinct
+  operational check AFTER promotion;
+  it is not proof of deployed binaries.
+end note
+note bottom of Inception
+  recordValidated(evidence) is a trusted
+  external-validation event in the model.
+end note
+@enduml
