@@ -3,5 +3,5 @@ BR-001,Off-duty prevents assignment,design/domain.puml;requirements/policy.json,
 BR-002,Already held slot prevents duplicate assignment,design/domain.puml;requirements/policy.json,formal/Proofs.lean::duplicate_denied,backend/src/domain.rs::allocate,contracts/scenarios.json;backend/tests/scenarios.rs;scripts/smoke.py
 BR-003,Available slot gets assigned,design/sequence.puml;requirements/policy.json,formal/Proofs.lean::accepted_prepends_slot,backend/src/domain.rs::allocate,contracts/scenarios.json;backend/tests/scenarios.rs;scripts/smoke.py
 SR-001,Rejected assignment preserves roster,design/goal-refinement.md,formal/Proofs.lean::rejected_preserves_roster,backend/src/domain.rs::allocate,backend/tests/scenarios.rs;scripts/smoke.py
-SR-002,Atomic read-decide-write,design/sequence.puml,Not proved in Lean,backend/src/main.rs::assign_slot,scripts/smoke.py;SQLite immediate transaction;database unique constraint
-SR-003,Audit known attempts,design/sequence.puml,Not proved in Lean,backend/src/main.rs::assign_slot,scripts/smoke.py
+SR-002,Atomic read-decide-write,design/sequence.puml,formal/Transactions.lean::run_no_double_booking (assumes SQLite atomicity and IMMEDIATE serialization),backend/src/service.rs::assign_slot_tx,backend/tests/transactions.rs;scripts/smoke.py;database unique constraint
+SR-003,Audit known attempts,design/sequence.puml,formal/Transactions.lean::tx_audits_exactly_once,backend/src/service.rs::assign_slot_tx,backend/tests/transactions.rs;scripts/smoke.py

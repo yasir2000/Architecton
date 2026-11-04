@@ -68,7 +68,8 @@ remains `[42]`. Mark the instructor off duty and try slot 43; it returns `409` /
 | Scenario formal checking | `formal/Scenarios.lean` (generated) | Lean `decide` examples |
 | Executable domain | `backend/src/domain.rs` (generated) | Rust unit/contract tests |
 | API | `backend/src/main.rs`, `contracts/openapi.yaml` | HTTP smoke test |
-| Persistence + audit | SQLite schema initialized in `main.rs` | Transactions, unique constraint, smoke test |
+| Persistence + audit | `backend/src/service.rs` (schema and transaction) | Unique constraint, smoke test, `backend/tests/transactions.rs` |
+| Transaction model | `formal/Transactions.lean` (handwritten) | Lean proves atomicity, audit and no double booking, assuming SQLite rollback and `BEGIN IMMEDIATE` serialization |
 | Build + deploy | `infra/Dockerfile`, `infra/compose.yaml` | OCI build |
 | CI/CD | `.github/workflows/verify.yml` | Regenerate check → Lean proofs → Rust tests → HTTP → image |
 
@@ -90,6 +91,7 @@ export LEAN_PATH=formal
 lean -o formal/DriverPass.olean formal/DriverPass.lean
 lean formal/Proofs.lean
 lean formal/Scenarios.lean
+lean formal/Transactions.lean
 ```
 
 This project intentionally **does not require Mathlib**, so installation is

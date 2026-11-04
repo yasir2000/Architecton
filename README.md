@@ -105,6 +105,7 @@ export LEAN_PATH=formal
 lean -o formal/DriverPass.olean formal/DriverPass.lean
 lean formal/Proofs.lean
 lean formal/Scenarios.lean
+lean formal/Transactions.lean
 cargo test --manifest-path backend/Cargo.toml
 cargo run --manifest-path backend/Cargo.toml
 ```
@@ -143,12 +144,18 @@ These two pre-existing Lean files are complementary to, but independent of, the 
 
 ## Research roadmap: next work packages
 
-The typed artifact IR has a working v1 and cross-language conformance has started. The rest are planned and not yet implemented; see the [milestones](docs/vision.md#milestones).
+The typed artifact IR has a working v1, and cross-language conformance is implemented for the DriverPass slice. The rest are planned and not yet implemented; see the [milestones](docs/vision.md#milestones).
 
 - **Typed artifact IR** (v1 implemented, see [packages/ir](packages/ir/README.md)): goals, requirement statements, risk identifiers, typed state transitions, invariants, provenance anchors and artifact hashes. The DriverPass slice has a [checked IR instance](examples/driverpass/ir/driverpass.ir.json), and the Lean kernel proves it well-formed.
 - **Trusted evidence ledger:** content-addressed inputs; CI-signed attestations; immutable proof results; validator identity; dependency DAG; revocation and scoped re-verification.
 - **Design refinements:** well-formed UML activity/state/sequence subset, executable semantics, ArchiMate architecture constraints and trace relations.
-- **Cross-language conformance** (started, see [packages/ir](packages/ir/README.md#cross-language-conformance-driverpass)): Lean ↔ Rust reference equivalence, SQLite transaction models, test oracle generation, failure injection and systematic bounded checking. Done so far: a Lean proof that the DriverPass IR transition equals the Lean `allocate` for all inputs, and 850 kernel-checked oracle vectors replayed against Rust. SQLite transaction models and failure injection remain.
+- **Cross-language conformance** (DriverPass slice implemented, see [packages/ir](packages/ir/README.md#cross-language-conformance-driverpass) and [assurance](docs/assurance.md)): Lean ↔ Rust reference equivalence, SQLite transaction models, test oracle generation, failure injection and systematic bounded checking. Done so far:
+  - a Lean proof that the DriverPass IR transition equals the Lean `allocate` for all inputs;
+  - 850 kernel-checked oracle vectors, replayed against Rust;
+  - a Lean model of the SQLite transaction proving atomicity, exactly-once audit and no double booking, assuming SQLite's own guarantees;
+  - Rust tests against real SQLite: fault injection, concurrent connections, and every request sequence up to length 4.
+
+  Still open: equivalence for all Rust inputs, and generalising beyond DriverPass.
 - **Temporal/runtime verification:** LTL/TLA+ transition properties, deadlock/liveness/fairness, distributed consistency and monitored production traces.
 
 ## Principle

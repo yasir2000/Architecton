@@ -6,8 +6,9 @@ use axum::{
     routing::{get, patch, post},
     Json, Router,
 };
-use driverpass_poc::domain::{allocate, Decision, Roster};
-use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
+use driverpass_poc::domain::Decision;
+use driverpass_poc::service::{assign_slot_tx, initialize, load_roster, TxError};
+use rusqlite::{params, Connection, TransactionBehavior};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::{env, net::SocketAddr, sync::{Arc, Mutex}};
@@ -26,24 +27,6 @@ fn reply(status: StatusCode, body: Value) -> ApiResponse {
 fn db_error(error: impl std::fmt::Display) -> ApiResponse {
     eprintln!("database error: {error}");
     reply(StatusCode::INTERNAL_SERVER_ERROR, json!({"error":"database_error"}))
-}
-
-fn load_roster(db: &Connection, instructor_id: i64) -> rusqlite::Result<Option<Roster>> {
-    let duty: Option<i64> = db
-        .query_row(
-            "SELECT off_duty FROM instructors WHERE id = ?1",
-            [instructor_id],
-            |row| row.get(0),
-        )
-        .optional()?;
-    let Some(duty) = duty else { return Ok(None) };
-    let mut stmt = db.prepare(
-        "SELECT slot_id FROM allocations WHERE instructor_id = ?1 ORDER BY seq DESC",
-    )?;
-    let slots = stmt
-        .query_map([instructor_id], |row| row.get::<_, i64>(0))?
-        .collect::<rusqlite::Result<Vec<_>>>()?;
-    Ok(Some(Roster { off_duty: duty != 0, slots }))
 }
 
 #[derive(Deserialize)]
@@ -108,39 +91,18 @@ async fn assign_slot(
         return reply(StatusCode::BAD_REQUEST, json!({"error":"slot_id_must_be_nonnegative"}));
     }
     let mut db = state.db.lock().expect("SQLite mutex poisoned");
-    // Serializes read/decide/write, preventing concurrent double bookings in this SQLite PoC.
-    let tx = match db.transaction_with_behavior(TransactionBehavior::Immediate) {
-        Ok(tx) => tx,
-        Err(e) => return db_error(e),
-    };
-    let current = match load_roster(&tx, id) {
-        Ok(Some(roster)) => roster,
-        Ok(None) => return reply(StatusCode::NOT_FOUND, json!({"error":"unknown_instructor"})),
-        Err(e) => return db_error(e),
-    };
-    let (expected, decision) = allocate(&current, request.slot_id);
-    if decision == Decision::Accepted {
-        if let Err(e) = tx.execute(
-            "INSERT INTO allocations(instructor_id, slot_id) VALUES (?1, ?2)",
-            params![id, request.slot_id],
-        ) { return db_error(e) }
-    }
-    if let Err(e) = tx.execute(
-        "INSERT INTO allocation_audit(instructor_id, slot_id, decision) VALUES (?1, ?2, ?3)",
-        params![id, request.slot_id, decision_name(decision)],
-    ) { return db_error(e) }
-    if let Err(e) = tx.commit() { return db_error(e) }
-    reply(
-        if decision == Decision::Accepted { StatusCode::CREATED } else { StatusCode::CONFLICT },
-        json!({"id":id,"decision":decision,"roster":expected}),
-    )
-}
-
-fn decision_name(decision: Decision) -> &'static str {
-    match decision {
-        Decision::Accepted => "accepted",
-        Decision::OffDuty => "off_duty",
-        Decision::Duplicate => "duplicate",
+    // The whole read/decide/write/audit runs in one IMMEDIATE transaction:
+    // see service::assign_slot_tx and formal/Transactions.lean.
+    match assign_slot_tx(&mut db, id, request.slot_id, None) {
+        Ok((decision, roster)) => reply(
+            if decision == Decision::Accepted { StatusCode::CREATED } else { StatusCode::CONFLICT },
+            json!({"id":id,"decision":decision,"roster":roster}),
+        ),
+        Err(TxError::UnknownInstructor) => {
+            reply(StatusCode::NOT_FOUND, json!({"error":"unknown_instructor"}))
+        }
+        Err(TxError::Database(e)) => db_error(e),
+        Err(TxError::Injected(f)) => db_error(format!("unexpected injected fault {f:?}")),
     }
 }
 
@@ -163,33 +125,6 @@ async fn audit(State(state): State<AppState>) -> ApiResponse {
         Ok(rows) => reply(StatusCode::OK, json!({"entries":rows})),
         Err(e) => db_error(e),
     }
-}
-
-fn initialize(conn: &Connection) -> rusqlite::Result<()> {
-    conn.execute_batch(
-        "PRAGMA foreign_keys=ON;
-         PRAGMA journal_mode=WAL;
-         PRAGMA synchronous=FULL;
-         PRAGMA busy_timeout=5000;
-         CREATE TABLE IF NOT EXISTS instructors (
-            id INTEGER PRIMARY KEY CHECK(id >= 0),
-            off_duty INTEGER NOT NULL CHECK(off_duty IN (0,1))
-         );
-         CREATE TABLE IF NOT EXISTS allocations (
-            seq INTEGER PRIMARY KEY AUTOINCREMENT,
-            instructor_id INTEGER NOT NULL REFERENCES instructors(id),
-            slot_id INTEGER NOT NULL CHECK(slot_id >= 0),
-            UNIQUE(instructor_id, slot_id)
-         );
-         CREATE TABLE IF NOT EXISTS allocation_audit (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            instructor_id INTEGER NOT NULL REFERENCES instructors(id),
-            slot_id INTEGER NOT NULL CHECK(slot_id >= 0),
-            decision TEXT NOT NULL CHECK(decision IN ('accepted','off_duty','duplicate')),
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-         );
-         INSERT OR IGNORE INTO instructors(id, off_duty) VALUES (7, 0);"
-    )
 }
 
 #[tokio::main]

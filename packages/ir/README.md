@@ -63,7 +63,7 @@ Result: the IR and Lean agree for all inputs; Rust agrees with both on the 850 v
 
 - **Faithfulness.** Whether the IR correctly captures the natural-language requirements is a human review decision. The anchors show *where* a claim comes from, not that it was interpreted correctly.
 - **Realization, in general.** An `implementation` or `proof` anchor shows that the named function or theorem exists in the pinned file, not that it implements or proves the requirement. For DriverPass's `assign_slot`, the conformance chain above closes this gap: fully for Lean, and on the bounded oracle for Rust. Other anchors, such as SR-002's transaction code, are still existence-only.
-- **Evidence strength.** A `test` anchor only says a test touches the requirement. For example, `scripts/smoke.py` sends requests one at a time, so it does not test SR-002's atomicity under concurrency.
+- **Evidence strength.** A `test` anchor only says a test touches the requirement. For example, `scripts/smoke.py` sends requests one at a time, so on its own it does not test SR-002's atomicity under concurrency; `backend/tests/transactions.rs`, also anchored on SR-002, does.
 - **Trust in the hashes.** Hashes detect drift after review; they are not signed. Signed attestations belong to the trusted evidence ledger work package.
 
 ## Run checks
