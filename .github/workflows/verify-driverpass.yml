@@ -35,6 +35,7 @@ jobs:
           LEAN_PATH=formal lean -o formal/DriverPass.olean formal/DriverPass.lean
           LEAN_PATH=formal lean formal/Proofs.lean
           LEAN_PATH=formal lean formal/Scenarios.lean
+          LEAN_PATH=formal lean formal/Transactions.lean
       - uses: dtolnay/rust-toolchain@stable
       - name: Run Rust semantic contract tests
         run: cargo test --manifest-path backend/Cargo.toml

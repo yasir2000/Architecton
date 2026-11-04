@@ -22,12 +22,13 @@ A research proof of concept that links one chain of artifacts end to end:
 - a Rust domain implementation and Axum/SQLite REST service checked against the same shared scenarios;
 - Docker packaging and CI that re-run every check.
 
-The current working slice is the **DriverPass instructor/lesson slot assignment** workflow. Reusable tooling (typed IR, model transformations, refinement proofs) is planned in [packages/](packages/README.md) but not yet implemented.
+The current working slice is the **DriverPass instructor/lesson slot assignment** workflow. Reusable tooling lives in [packages/](packages/README.md): the typed artifact IR v1 is implemented, while model transformations and refinement proofs are still planned.
 
 ### When
 
 - **Now (M0):** the DriverPass vertical slice is implemented and is the only completed milestone.
-- **Next (M1–M5):** typed IR, multiple model projections, refinement proofs, infrastructure verification and assurance evidence. See the [roadmap](docs/vision.md#milestones).
+- **In progress (M1):** the typed artifact IR v1 is implemented and checked on DriverPass; generalizing its type system beyond `Bool`, `Nat` and `List Nat` remains.
+- **Next (M2–M5):** multiple model projections, refinement proofs, infrastructure verification and assurance evidence. See the [roadmap](docs/vision.md#milestones).
 - **Use it when** you want a worked example of tracing a business rule through formal proof to an executable service, or a starting point for research on requirements-to-code refinement. **Don't use it** as production software: the sample API has no authentication and must stay loopback-only.
 
 ### How
@@ -104,6 +105,7 @@ export LEAN_PATH=formal
 lean -o formal/DriverPass.olean formal/DriverPass.lean
 lean formal/Proofs.lean
 lean formal/Scenarios.lean
+lean formal/Transactions.lean
 cargo test --manifest-path backend/Cargo.toml
 cargo run --manifest-path backend/Cargo.toml
 ```
@@ -115,9 +117,10 @@ Requires Python 3, Lean 4 (pinned in `lean-toolchain`), and Rust/Cargo. See the 
 ```text
 Architecton/
   docs/                          Vision, assurance boundary, milestones
-  packages/lifecycle/             Formal RUP methodology and Lean phase-gate verification
-  packages/                      Future semantic IR/refinement tooling
+  packages/ir/                   Typed artifact IR: checker, Lean semantics and proofs
+  packages/lifecycle/            Formal RUP methodology and Lean phase-gate verification
   examples/driverpass/
+    ir/                          DriverPass IR instance and its generated Lean model
     requirements/                Normalized policy and traceability
     design/                      Goals, UML and ArchiMate mapping
     formal/                      Lean 4 model, scenarios and theorems
@@ -138,6 +141,22 @@ The original source artifacts are preserved at the repository root:
 - [DriverPassDesign.lean](DriverPassDesign.lean) — UML/design formalization
 
 These two pre-existing Lean files are complementary to, but independent of, the **narrow generated instructor-slot assignment example**. Their entire theorem sets are not covered by the example's verification workflow; see [source integration status](docs/source-integration.md).
+
+## Research roadmap: next work packages
+
+The typed artifact IR has a working v1, and cross-language conformance is implemented for the DriverPass slice. The rest are planned and not yet implemented; see the [milestones](docs/vision.md#milestones).
+
+- **Typed artifact IR** (v1 implemented, see [packages/ir](packages/ir/README.md)): goals, requirement statements, risk identifiers, typed state transitions, invariants, provenance anchors and artifact hashes. The DriverPass slice has a [checked IR instance](examples/driverpass/ir/driverpass.ir.json), and the Lean kernel proves it well-formed.
+- **Trusted evidence ledger:** content-addressed inputs; CI-signed attestations; immutable proof results; validator identity; dependency DAG; revocation and scoped re-verification.
+- **Design refinements:** well-formed UML activity/state/sequence subset, executable semantics, ArchiMate architecture constraints and trace relations.
+- **Cross-language conformance** (DriverPass slice implemented, see [packages/ir](packages/ir/README.md#cross-language-conformance-driverpass) and [assurance](docs/assurance.md)): Lean ↔ Rust reference equivalence, SQLite transaction models, test oracle generation, failure injection and systematic bounded checking. Done so far:
+  - a Lean proof that the DriverPass IR transition equals the Lean `allocate` for all inputs;
+  - 850 kernel-checked oracle vectors, replayed against Rust;
+  - a Lean model of the SQLite transaction proving atomicity, exactly-once audit and no double booking, assuming SQLite's own guarantees;
+  - Rust tests against real SQLite: fault injection, concurrent connections, and every request sequence up to length 4.
+
+  Still open: equivalence for all Rust inputs, and generalising beyond DriverPass.
+- **Temporal/runtime verification:** LTL/TLA+ transition properties, deadlock/liveness/fairness, distributed consistency and monitored production traces.
 
 ## Principle
 

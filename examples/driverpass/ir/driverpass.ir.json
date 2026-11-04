@@ -1,0 +1,177 @@
+{
+  "ir_version": "1.0.0",
+  "name": "DriverPass instructor-slot allocation",
+  "artifacts": [
+    {"id": "ART-BRD", "path": "CS 255 Business Requirements Document Template.docx", "sha256": "8f0d11f525851f969d8fe9664c53dad67f1601766369958b73a1f235ad94cb87"},
+    {"id": "ART-POLICY", "path": "examples/driverpass/requirements/policy.json", "sha256": "b1590964089b173ca40acce4e2be1c0c1eb7aa2acbb0efaa4f76582390f0eab3"},
+    {"id": "ART-GOALS", "path": "examples/driverpass/design/goal-refinement.md", "sha256": "d5842de7dd10e4acefeec823ac63f02b277d11043facc3bd0fa921502604d7b3"},
+    {"id": "ART-DOMAIN-UML", "path": "examples/driverpass/design/domain.puml", "sha256": "17df7ad16658ecb41939d8c1ea94219f6d9304cc81f380da4c38edca274a8141"},
+    {"id": "ART-SEQUENCE-UML", "path": "examples/driverpass/design/sequence.puml", "sha256": "5583129230571cd4640140146f6711e3c840e12d45916f34a4a0caa853a717f3"},
+    {"id": "ART-LEAN-SPEC", "path": "examples/driverpass/formal/DriverPass.lean", "sha256": "450346a32ac2feb712834de529c3d3d2226969e11261dc5b162738b49782ef0a"},
+    {"id": "ART-LEAN-PROOFS", "path": "examples/driverpass/formal/Proofs.lean", "sha256": "645b866b92774837bdfd8c80a30c053245c6d776742754985aad24f05da83f2a"},
+    {"id": "ART-RUST-DOMAIN", "path": "examples/driverpass/backend/src/domain.rs", "sha256": "ce92a0c2005c99603ffe8322c327c889a36c132c2cc8d2a45d47f046f2379211"},
+    {"id": "ART-RUST-API", "path": "examples/driverpass/backend/src/main.rs", "sha256": "c45810d6c014c53ffb60b08c28e0f0067eb9f897ede62ce09119c72eb4fd4d39"},
+    {"id": "ART-SCENARIOS", "path": "examples/driverpass/contracts/scenarios.json", "sha256": "3d0a02f0fad70f8eb3f18e8d4e125289b13ac8ecc17f8fc68b647e87a7846bc4"},
+    {"id": "ART-SMOKE", "path": "examples/driverpass/scripts/smoke.py", "sha256": "2ea656ed0e188c73a0add4755c3d69b0effa06f720144fd560892eb20832fb95"},
+    {"id": "ART-REFINEMENT", "path": "examples/driverpass/ir/Refinement.lean", "sha256": "2c9fb2dc879ab28abc6c2e816e2c3913dac71500b4d7b781cf6dc07aa7904b3f"},
+    {"id": "ART-RUST-ORACLE", "path": "examples/driverpass/backend/tests/oracle.rs", "sha256": "42df6ef5214665b85fada3c557090efe6204f14bb5a88fb7e02794073ff1297f"},
+    {"id": "ART-LEAN-TX", "path": "examples/driverpass/formal/Transactions.lean", "sha256": "38a4fe5b1993f5f72d2403b0c6aec3a3a6ff94c2e288232f2a1c06e32ba197fc"},
+    {"id": "ART-RUST-SERVICE", "path": "examples/driverpass/backend/src/service.rs", "sha256": "406f44b1ea5d9445e0354933172c046679e76ca2695153562d925e072d79ce89"},
+    {"id": "ART-RUST-TX-TESTS", "path": "examples/driverpass/backend/tests/transactions.rs", "sha256": "fbea7f33dba08960b8b2079858d5f0997e3b1811a3d69b49c973eebfbcfc1707"}
+  ],
+  "goals": [
+    {
+      "id": "G0",
+      "parent": null,
+      "statement": "An instructor must never acquire an invalid lesson allocation.",
+      "provenance": [
+        {"artifact": "ART-BRD", "anchor": "make reservations for customers", "role": "source"},
+        {"artifact": "ART-GOALS", "anchor": "**G0:**", "role": "design"}
+      ]
+    },
+    {"id": "G1", "parent": "G0", "statement": "If off duty at the instant of assignment, reject it.",
+     "provenance": [{"artifact": "ART-GOALS", "anchor": "G1 (BR-001)", "role": "design"}]},
+    {"id": "G2", "parent": "G0", "statement": "If the same instructor already holds the slot, reject it.",
+     "provenance": [{"artifact": "ART-GOALS", "anchor": "G2 (BR-002)", "role": "design"}]},
+    {"id": "G3", "parent": "G0", "statement": "Otherwise assign the slot exactly once.",
+     "provenance": [{"artifact": "ART-GOALS", "anchor": "G3 (BR-003)", "role": "design"}]},
+    {"id": "G4", "parent": "G0", "statement": "All rejection outcomes leave the roster unchanged.",
+     "provenance": [{"artifact": "ART-GOALS", "anchor": "G4 (SR-001)", "role": "design"}]},
+    {"id": "G5", "parent": "G0", "statement": "Read, decide and write form one atomic SQLite transaction.",
+     "provenance": [{"artifact": "ART-GOALS", "anchor": "G5 (SR-002)", "role": "design"}]},
+    {"id": "G6", "parent": "G0", "statement": "Every processed attempt for a known instructor produces a durable audit record.",
+     "provenance": [{"artifact": "ART-GOALS", "anchor": "G6 (SR-003)", "role": "design"}]}
+  ],
+  "requirements": [
+    {
+      "id": "BR-001", "kind": "business", "goals": ["G1"],
+      "statement": "Reject assignment if the instructor is off duty.",
+      "provenance": [
+        {"artifact": "ART-REFINEMENT", "anchor": "theorem ir_refines_allocate", "role": "proof"},
+        {"artifact": "ART-RUST-ORACLE", "anchor": "fn rust_matches_ir_oracle", "role": "test"},
+        {"artifact": "ART-POLICY", "anchor": "BR-001", "role": "source"},
+        {"artifact": "ART-LEAN-PROOFS", "anchor": "theorem offDuty_denied", "role": "proof"},
+        {"artifact": "ART-RUST-DOMAIN", "anchor": "pub fn allocate", "role": "implementation"},
+        {"artifact": "ART-SCENARIOS", "anchor": "off_duty", "role": "test"}
+      ]
+    },
+    {
+      "id": "BR-002", "kind": "business", "goals": ["G2"],
+      "statement": "Reject assignment if this instructor already holds this slot.",
+      "provenance": [
+        {"artifact": "ART-REFINEMENT", "anchor": "theorem ir_refines_allocate", "role": "proof"},
+        {"artifact": "ART-RUST-ORACLE", "anchor": "fn rust_matches_ir_oracle", "role": "test"},
+        {"artifact": "ART-POLICY", "anchor": "BR-002", "role": "source"},
+        {"artifact": "ART-LEAN-PROOFS", "anchor": "theorem duplicate_denied", "role": "proof"},
+        {"artifact": "ART-RUST-DOMAIN", "anchor": "pub fn allocate", "role": "implementation"},
+        {"artifact": "ART-SCENARIOS", "anchor": "duplicate", "role": "test"}
+      ]
+    },
+    {
+      "id": "BR-003", "kind": "business", "goals": ["G3"],
+      "statement": "Accept and prepend a previously unassigned slot.",
+      "provenance": [
+        {"artifact": "ART-REFINEMENT", "anchor": "theorem ir_refines_allocate", "role": "proof"},
+        {"artifact": "ART-RUST-ORACLE", "anchor": "fn rust_matches_ir_oracle", "role": "test"},
+        {"artifact": "ART-POLICY", "anchor": "BR-003", "role": "source"},
+        {"artifact": "ART-LEAN-PROOFS", "anchor": "theorem accepted_prepends_slot", "role": "proof"},
+        {"artifact": "ART-RUST-DOMAIN", "anchor": "pub fn allocate", "role": "implementation"},
+        {"artifact": "ART-SCENARIOS", "anchor": "accepted", "role": "test"}
+      ]
+    },
+    {
+      "id": "SR-001", "kind": "nonfunctional", "goals": ["G4"],
+      "statement": "No rejected assignment may mutate the roster.",
+      "provenance": [
+        {"artifact": "ART-LEAN-TX", "anchor": "theorem tx_rejected_keeps_allocations", "role": "proof"},
+        {"artifact": "ART-RUST-TX-TESTS", "anchor": "fn every_injected_fault_rolls_back_completely", "role": "test"},
+        {"artifact": "ART-REFINEMENT", "anchor": "theorem ir_refines_allocate", "role": "proof"},
+        {"artifact": "ART-RUST-ORACLE", "anchor": "fn rust_matches_ir_oracle", "role": "test"},
+        {"artifact": "ART-POLICY", "anchor": "SR-001", "role": "source"},
+        {"artifact": "ART-LEAN-PROOFS", "anchor": "theorem rejected_preserves_roster", "role": "proof"},
+        {"artifact": "ART-RUST-DOMAIN", "anchor": "pub fn allocate", "role": "implementation"}
+      ]
+    },
+    {
+      "id": "SR-002", "kind": "nonfunctional", "goals": ["G5"],
+      "statement": "Each API request is executed in one SQLite IMMEDIATE transaction.",
+      "provenance": [
+        {"artifact": "ART-LEAN-TX", "anchor": "theorem run_no_double_booking", "role": "proof"},
+        {"artifact": "ART-RUST-SERVICE", "anchor": "TransactionBehavior::Immediate", "role": "implementation"},
+        {"artifact": "ART-RUST-TX-TESTS", "anchor": "fn concurrent_connections_never_double_book", "role": "test"},
+        {"artifact": "ART-RUST-TX-TESTS", "anchor": "fn all_request_sequences_up_to_length_4_match_reference", "role": "test"},
+        {"artifact": "ART-POLICY", "anchor": "SR-002", "role": "source"},
+        {"artifact": "ART-SEQUENCE-UML", "anchor": "BEGIN IMMEDIATE", "role": "design"},
+        {"artifact": "ART-RUST-API", "anchor": "async fn assign_slot", "role": "implementation"},
+        {"artifact": "ART-SMOKE", "anchor": "\"POST\", \"/api/v1/instructors/7/slots\"", "role": "test"}
+      ]
+    },
+    {
+      "id": "SR-003", "kind": "nonfunctional", "goals": ["G6"],
+      "statement": "Every attempted assignment of a known instructor is recorded in durable audit history.",
+      "provenance": [
+        {"artifact": "ART-LEAN-TX", "anchor": "theorem tx_audits_exactly_once", "role": "proof"},
+        {"artifact": "ART-RUST-SERVICE", "anchor": "INSERT INTO allocation_audit", "role": "implementation"},
+        {"artifact": "ART-RUST-TX-TESTS", "anchor": "fn each_committed_request_audits_exactly_once", "role": "test"},
+        {"artifact": "ART-POLICY", "anchor": "SR-003", "role": "source"},
+        {"artifact": "ART-RUST-API", "anchor": "audit", "role": "implementation"},
+        {"artifact": "ART-SMOKE", "anchor": "audit", "role": "test"}
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "RK-001", "status": "mitigated", "mitigated_by": ["SR-002"],
+      "statement": "Concurrent requests read the same roster and double-book a slot (lost update).",
+      "provenance": [{"artifact": "ART-GOALS", "anchor": "G5 (SR-002)", "role": "design"}]
+    },
+    {
+      "id": "RK-002", "status": "mitigated", "mitigated_by": ["SR-001", "BR-001", "BR-002"],
+      "statement": "A rejected attempt silently changes the roster.",
+      "provenance": [{"artifact": "ART-GOALS", "anchor": "G4 (SR-001)", "role": "design"}]
+    },
+    {
+      "id": "RK-003", "status": "mitigated", "mitigated_by": ["SR-003"],
+      "statement": "Assignment attempts leave no audit trail.",
+      "provenance": [{"artifact": "ART-GOALS", "anchor": "G6 (SR-003)", "role": "design"}]
+    },
+    {
+      "id": "RK-004", "status": "accepted", "mitigated_by": [],
+      "statement": "Organization-wide resource conflicts, test capacity, travel time and overlapping slot intervals are not modeled.",
+      "provenance": [{"artifact": "ART-GOALS", "anchor": "**Deliberate scope:**", "role": "design"}]
+    },
+    {
+      "id": "RK-005", "status": "open", "mitigated_by": [],
+      "statement": "The Lean model and the Rust implementation diverge on inputs outside the shared scenarios and bounded sweep.",
+      "provenance": [{"artifact": "ART-GOALS", "anchor": "It does **not** prove the above relation", "role": "design"}]
+    }
+  ],
+  "state_vars": [
+    {"name": "offDuty", "type": "Bool"},
+    {"name": "slots", "type": "List Nat"}
+  ],
+  "transitions": [
+    {
+      "id": "TR-assign_slot",
+      "params": [{"name": "slot", "type": "Nat"}],
+      "guards": [
+        {"requirement": "BR-001", "when": {"var": "offDuty"}, "outcome": "off_duty"},
+        {"requirement": "BR-002", "when": {"contains": [{"var": "slots"}, {"param": "slot"}]}, "outcome": "duplicate"}
+      ],
+      "otherwise": {
+        "requirement": "BR-003",
+        "outcome": "accepted",
+        "effect": [
+          {"var": "slots", "value": {"cons": [{"param": "slot"}, {"var": "slots"}]}}
+        ]
+      }
+    }
+  ],
+  "invariants": [
+    {
+      "id": "INV-001", "requirement": "BR-002",
+      "statement": "An instructor never holds the same slot twice.",
+      "body": {"nodup": {"var": "slots"}}
+    }
+  ]
+}

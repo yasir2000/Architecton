@@ -29,7 +29,9 @@ theorem successful_promotion_has_direct_successor (s : ProcessState)
   | some target =>
       cases hg : gateSatisfied s with
       | true =>
-          refine ⟨target, hn, ?_⟩
+          -- Depending on the Lean version, `cases` may already have rewritten
+          -- the goal to `some target = some target`.
+          refine ⟨target, by first | rfl | exact hn, ?_⟩
           simp [step, hn, hg]
       | false => simp [step, hn, hg] at h
 
