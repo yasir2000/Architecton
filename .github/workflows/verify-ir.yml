@@ -1,0 +1,52 @@
+name: Verify Architecton typed artifact IR
+
+on:
+  push:
+    paths:
+      - 'packages/ir/**'
+      - 'examples/driverpass/**'
+      - 'CS 255 Business Requirements Document Template.docx'
+      - '.github/workflows/verify-ir.yml'
+  pull_request:
+    paths:
+      - 'packages/ir/**'
+      - 'examples/driverpass/**'
+      - 'CS 255 Business Requirements Document Template.docx'
+      - '.github/workflows/verify-ir.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ir-assurance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit-test the IR checker
+        run: python3 -m unittest discover -s packages/ir/tests -v
+      - name: Check IR structure, types, references, artifact hashes and anchors
+        run: python3 packages/ir/scripts/irc.py check examples/driverpass/ir/driverpass.ir.json
+      - name: Check generated Lean model is in sync with the IR
+        run: >
+          python3 packages/ir/scripts/irc.py lean --check
+          examples/driverpass/ir/driverpass.ir.json
+          --out examples/driverpass/ir/DriverPassIR.lean --ident driverPass
+      - name: Reject proof holes and axioms in IR Lean sources
+        run: |
+          if grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]|native_decide' \
+              packages/ir/formal/*.lean examples/driverpass/ir/*.lean; then
+            echo 'ERROR: proof holes, axioms and native_decide are forbidden in the IR module'
+            exit 1
+          fi
+      - name: Install Lean 4 via elan
+        run: |
+          curl -fsSL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel-check IR semantics, negative cases and the DriverPass instance
+        working-directory: packages/ir
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          LEAN_PATH=formal lean -o formal/ArtifactIR.olean formal/ArtifactIR.lean
+          LEAN_PATH=formal lean formal/Negative.lean
+          LEAN_PATH=formal lean ../../examples/driverpass/ir/DriverPassIR.lean
