@@ -1,0 +1,50 @@
+name: Verify Architecton formal RUP lifecycle
+
+on:
+  push:
+    paths:
+      - 'packages/lifecycle/**'
+      - 'docs/methodology-rup-formal.md'
+      - 'examples/driverpass/lifecycle/**'
+      - '.github/workflows/verify-lifecycle.yml'
+  pull_request:
+    paths:
+      - 'packages/lifecycle/**'
+      - 'docs/methodology-rup-formal.md'
+      - 'examples/driverpass/lifecycle/**'
+      - '.github/workflows/verify-lifecycle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lifecycle-assurance:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/lifecycle
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify requirements policy / generated Lean gate
+        run: python3 scripts/generate_policy.py --check
+      - name: Check reference scenarios and 1,024 bounded states
+        run: python3 scripts/verify_scenarios.py
+      - name: Reject explicit proof holes in lifecycle Lean sources
+        run: |
+          if grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' formal/*.lean; then
+            echo 'ERROR: proof holes or axioms are forbidden in this lifecycle module'
+            exit 1
+          fi
+      - name: Install Lean 4 via elan
+        run: |
+          curl -fsSL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel-check state semantics, policy, proofs, and scenarios
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          LEAN_PATH=formal lean -o formal/ArchitectonLifecycle.olean formal/ArchitectonLifecycle.lean
+          LEAN_PATH=formal lean -o formal/Policy.olean formal/Policy.lean
+          LEAN_PATH=formal lean -o formal/StateMachine.olean formal/StateMachine.lean
+          LEAN_PATH=formal lean formal/Proofs.lean
+          LEAN_PATH=formal lean formal/Scenarios.lean

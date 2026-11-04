@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "ARCH-LIFECYCLE-001",
+  "description": "Architecton proof-oriented RUP phase gates for a single requirements baseline",
+  "phase_order": ["inception", "elaboration", "construction", "transition"],
+  "required_evidence": {
+    "inception": ["requirementsReviewed", "traceabilityReviewed"],
+    "elaboration": ["designReviewed", "formalSpecificationChecked"],
+    "construction": ["proofChecked", "conformancePassed", "artifactBuilt"],
+    "transition": []
+  },
+  "evidence_kinds": [
+    "requirementsReviewed", "traceabilityReviewed", "designReviewed",
+    "formalSpecificationChecked", "proofChecked", "conformancePassed",
+    "artifactBuilt", "deploymentValidated"
+  ],
+  "assumption": "A recordValidated command is accepted only from an externally trusted validator; this trust is not established by the Lean lifecycle model."
+}

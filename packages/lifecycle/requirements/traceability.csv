@@ -1,0 +1,9 @@
+requirement_id,informal_requirement,formal_statement,mechanism,verification,scope
+LC-001,Phase advancement requires reviewed evidence,successful_promotion_requires_gate,formal/Policy.lean plus formal/StateMachine.lean,Lean theorem,Single baseline and trusted attestations
+LC-002,No phase may be skipped,successful_promotion_has_direct_successor,formal/StateMachine.lean,Lean theorem,Single-step promotion
+LC-003,Blocked phase transitions must not mutate project state,blocked_promotion_preserves_state,formal/StateMachine.lean,Lean theorem,Single-step promotion
+LC-004,Iteration does not change phase or currently validated evidence,iteration_preserves_phase;iteration_preserves_evidence,formal/StateMachine.lean,Lean theorems,Same unchanged revision
+LC-005,Changes to requirements invalidate prior approvals and proofs,revision_invalidates_evidence;revision_restarts_inception;revision_archives_old_evidence;revision_has_no_initial_gate,formal/StateMachine.lean,Lean theorems,Revision event is explicit
+LC-006,Construction release requires proof and executable conformance evidence,construction_release_requires_evidence,formal/Policy.lean,Lean theorem,Assumes evidence source is trusted
+LC-007,Transition has no further automatic forward promotion,transition_not_promotable,formal/ArchitectonLifecycle.lean,Lean theorem,Four-phase process
+LC-008,Formal methods remain cross-cutting throughout the process,workflows_are_cross_cutting,formal/ArchitectonLifecycle.lean,Lean theorem,Enablement only; not effort allocation

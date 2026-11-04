@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Reference scenarios for RUP phase gates. These are tests, not a cross-language refinement proof.",
+  "cases": [
+    {
+      "id": "LC-S01-no-evidence-blocked",
+      "commands": [{"action": "promote"}],
+      "expect": {"outcome": "blocked", "phase": "inception", "revision": 0, "iteration": 0, "verified_count": 0}
+    },
+    {
+      "id": "LC-S02-inception-reviews-pass",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}],
+      "expect": {"outcome": "accepted", "phase": "elaboration", "revision": 0, "iteration": 0, "verified_count": 2}
+    },
+    {
+      "id": "LC-S03-no-traceability-review-blocked",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "promote"}],
+      "expect": {"outcome": "blocked", "phase": "inception", "revision": 0, "iteration": 0, "verified_count": 1}
+    },
+    {
+      "id": "LC-S04-elaboration-gate-independent",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}, {"action": "promote"}],
+      "expect": {"outcome": "blocked", "phase": "elaboration", "revision": 0, "iteration": 0}
+    },
+    {
+      "id": "LC-S05-elaboration-promotes-with-model-and-spec",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}, {"action": "recordValidated", "evidence": "designReviewed"}, {"action": "recordValidated", "evidence": "formalSpecificationChecked"}, {"action": "promote"}],
+      "expect": {"outcome": "accepted", "phase": "construction", "revision": 0, "iteration": 0}
+    },
+    {
+      "id": "LC-S06-construction-release-requires-proof",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}, {"action": "recordValidated", "evidence": "designReviewed"}, {"action": "recordValidated", "evidence": "formalSpecificationChecked"}, {"action": "promote"}, {"action": "recordValidated", "evidence": "conformancePassed"}, {"action": "recordValidated", "evidence": "artifactBuilt"}, {"action": "promote"}],
+      "expect": {"outcome": "blocked", "phase": "construction", "revision": 0}
+    },
+    {
+      "id": "LC-S07-full-verified-release",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}, {"action": "recordValidated", "evidence": "designReviewed"}, {"action": "recordValidated", "evidence": "formalSpecificationChecked"}, {"action": "promote"}, {"action": "recordValidated", "evidence": "proofChecked"}, {"action": "recordValidated", "evidence": "conformancePassed"}, {"action": "recordValidated", "evidence": "artifactBuilt"}, {"action": "promote"}],
+      "expect": {"outcome": "accepted", "phase": "transition", "revision": 0, "verified_count": 7}
+    },
+    {
+      "id": "LC-S08-transition-is-terminal",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}, {"action": "recordValidated", "evidence": "designReviewed"}, {"action": "recordValidated", "evidence": "formalSpecificationChecked"}, {"action": "promote"}, {"action": "recordValidated", "evidence": "proofChecked"}, {"action": "recordValidated", "evidence": "conformancePassed"}, {"action": "recordValidated", "evidence": "artifactBuilt"}, {"action": "promote"}, {"action": "promote"}],
+      "expect": {"outcome": "blocked", "phase": "transition", "revision": 0}
+    },
+    {
+      "id": "LC-S09-iterate-without-gate-reset",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "iterate"}, {"action": "iterate"}],
+      "expect": {"outcome": "accepted", "phase": "inception", "iteration": 2, "revision": 0, "verified_count": 1}
+    },
+    {
+      "id": "LC-S10-revision-archives-and-invalidates",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}, {"action": "reviseRequirements"}, {"action": "promote"}],
+      "expect": {"outcome": "blocked", "phase": "inception", "iteration": 1, "revision": 1, "verified_count": 0, "archive_count": 1}
+    },
+    {
+      "id": "LC-S11-new-review-required-after-revision",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}, {"action": "reviseRequirements"}, {"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}],
+      "expect": {"outcome": "accepted", "phase": "elaboration", "iteration": 1, "revision": 1, "archive_count": 1}
+    },
+    {
+      "id": "LC-S12-iteration-crosses-no-phase-boundary",
+      "commands": [{"action": "recordValidated", "evidence": "requirementsReviewed"}, {"action": "recordValidated", "evidence": "traceabilityReviewed"}, {"action": "promote"}, {"action": "iterate"}],
+      "expect": {"outcome": "accepted", "phase": "elaboration", "iteration": 1, "revision": 0}
+    }
+  ]
+}
