@@ -144,3 +144,9 @@ These two pre-existing Lean files are complementary to, but independent of, the 
 **Do not equate model-level formal proofs with verified deployed software.** Every claimed assurance must identify its assumptions, trusted computing base, coverage and refinement boundary. See [assurance limits](docs/assurance.md) and the [research roadmap](docs/vision.md).
 
 _ἀρχιτέκτων_: the master builder, responsible for unifying vision, structural design and execution.
+
+## License
+
+Copyright (C) 2026 Yasir Karam
+
+Architecton is licensed under the [GNU Affero General Public License v3.0](LICENSE) (SPDX: `AGPL-3.0-only`). If you modify it and let others use it over a network, you must offer them the corresponding source code.
