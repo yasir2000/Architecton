@@ -175,7 +175,7 @@ The typed artifact IR, the evidence ledger and design refinements have working v
 - **Temporal/runtime verification** (Lean temporal core implemented, see [packages/temporal](packages/temporal/README.md)): LTL/TLA+ transition properties, deadlock/liveness/fairness, distributed consistency and monitored production traces. Done so far:
   - one LTL syntax with infinite-trace and finite-trace (LTLf) semantics, and kernel-checked theorems linking them (a finite violation of a safety formula is final; a finite witness proves an eventuality);
   - lifecycle: safe promotion, revision reset, no phase skipping, evidence monotonicity, deadlock-freedom, and liveness under explicit fairness assumptions, each shown necessary;
-  - DriverPass: no double booking on every infinite run, all-or-nothing, exactly-once audit, progress, liveness under client retries, and the lost-update race as a temporal violation.
+  - DriverPass: no double booking on every infinite run, all-or-nothing, exactly-once audit, progress, a booking that lands and persists once one fault-free request is made, and the lost-update race as a temporal violation.
 
   Still open: runtime monitoring of production traces, a TLA+ concurrency model, and distributed consistency.
 

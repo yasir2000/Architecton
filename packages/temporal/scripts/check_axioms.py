@@ -18,7 +18,7 @@ REQUIRED = [
     "safe_prefix", "cosafe_prefix",
     "L1", "L2", "L3", "L4", "L5_reach", "L6", "L6_ltl",
     "L6_needs_no_revise", "L6_needs_promote", "L6_needs_evidence",
-    "D1", "D2", "D3", "D4a", "D4b", "D5", "D5_extensions",
+    "D1", "D2", "D3", "D4a", "D4b", "D4b_once", "D5", "D5_extensions",
 ]
 
 ALLOWED = {"propext", "Quot.sound", "Classical.choice"}

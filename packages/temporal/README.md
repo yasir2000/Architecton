@@ -42,7 +42,7 @@ Each L6 assumption is necessary: `L6_needs_no_revise`, `L6_needs_evidence` and `
 | D2 | safety | an undecided request changes nothing; allocations only grow | none |
 | D3 | response | a fault-free request for a known instructor is decided and audited exactly once, in the same step | none |
 | D4a | progress | an on-duty instructor's fault-free request for a free slot is accepted | none |
-| D4b | liveness | the slot is eventually booked and stays booked, despite arbitrary faults in between | the instructor is on duty; the client retries the request infinitely often |
+| D4b | liveness | the slot is eventually booked and stays booked, despite arbitrary faults before and after | the instructor is on duty; **one** fault-free request for the slot is made (`D4b_once`). The spec's form, assuming the client retries infinitely often (`D4b`), is a corollary: retrying is not what makes it hold |
 | D5 | violation | the lost-update interleaving violates `□ allocOkB` on a two-state trace, so (by `safe_prefix`) on every continuation | none |
 
 ## Run the checks

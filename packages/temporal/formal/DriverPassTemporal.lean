@@ -15,7 +15,7 @@ is imported unchanged and viewed as a system: state `Db`, input
 | D2 | safety | a request that is not decided changes nothing; allocations only grow |
 | D3 | response | a fault-free request for a known instructor is decided and audited exactly once, in the same step |
 | D4a | progress | an on-duty instructor's fault-free request for a free slot is accepted |
-| D4b | liveness | if a request is retried infinitely often, the slot is eventually booked and stays booked |
+| D4b | liveness | once a fault-free request is made, the slot is booked and stays booked (`D4b_once`); the spec's retry-fairness form follows (`D4b`) |
 | D5 | violation | the lost-update interleaving violates D1's formula on a two-state trace, and so on every continuation |
 
 Assurance boundary: properties of the Lean model, under the model's
@@ -159,7 +159,7 @@ theorem D5_extensions (w : Nat → Db) (h : prefixOf w 2 = racyTrace) :
   rw [h, D5] at this
   exact Bool.false_ne_true this
 
-/-! ## D4b: liveness under retry fairness -/
+/-! ## D4b: a booking request eventually lands and persists -/
 
 theorem instructors_stable (db : Db) (q : Req) :
     (driverpass.step db q).1.instructors = db.instructors := by
@@ -200,8 +200,11 @@ theorem request_books (db : Db) (i slot : Nat) (cur : Roster) (hr : roster db i 
     exact mem_slotsOf.1 hin
   · simp [assignTx, hr, allocate, hon, hin]
 
-theorem D4b (db0 : Db) (i slot : Nat) (r0 : Roster) (hr : roster db0 i = some r0)
-    (hon : r0.offDuty = false) (u : Nat → Req) (hinf : ∀ n, ∃ m ≥ n, u m = (i, slot, none)) :
+/-- D4b, sharpest form: a single fault-free request by an on-duty instructor
+books the slot for good, whatever faults or other requests come before or
+after it. -/
+theorem D4b_once (db0 : Db) (i slot : Nat) (r0 : Roster) (hr : roster db0 i = some r0)
+    (hon : r0.offDuty = false) (u : Nat → Req) (hone : ∃ m, u m = (i, slot, none)) :
     sat (runFrom driverpass db0 u) 0
       (.eventually (.always (.atom fun r => (slotsOf r.post.allocations i).contains slot))) := by
   -- the instructor list never changes, so `i` stays known and on duty
@@ -213,7 +216,7 @@ theorem D4b (db0 : Db) (i slot : Nat) (r0 : Roster) (hr : roster db0 i = some r0
   have hros : ∀ n, roster (statesFrom driverpass db0 u n) i =
       some ⟨false, slotsOf (statesFrom driverpass db0 u n).allocations i⟩ := by
     intro n; unfold roster; rw [hlook n]; rfl
-  obtain ⟨m, _, hm⟩ := hinf 0
+  obtain ⟨m, hm⟩ := hone
   have hbook : (i, slot) ∈ (statesFrom driverpass db0 u (m + 1)).allocations := by
     show (i, slot) ∈ (driverpass.step (statesFrom driverpass db0 u m) (u m)).1.allocations
     rw [hm]
@@ -231,5 +234,14 @@ theorem D4b (db0 : Db) (i slot : Nat) (r0 : Roster) (hr : roster db0 i = some r0
   have := hkeep (n - m)
   rw [show m + 1 + (n - m) = n + 1 by omega] at this
   simpa using mem_slotsOf.2 this
+
+/-- D4b as stated in the spec, with retry fairness. Retrying infinitely often
+is more than needed: by `D4b_once`, one fault-free request is enough. -/
+theorem D4b (db0 : Db) (i slot : Nat) (r0 : Roster) (hr : roster db0 i = some r0)
+    (hon : r0.offDuty = false) (u : Nat → Req) (hinf : ∀ n, ∃ m ≥ n, u m = (i, slot, none)) :
+    sat (runFrom driverpass db0 u) 0
+      (.eventually (.always (.atom fun r => (slotsOf r.post.allocations i).contains slot))) :=
+  let ⟨m, _, hm⟩ := hinf 0
+  D4b_once db0 i slot r0 hr hon u ⟨m, hm⟩
 
 end Architecton.Temporal
