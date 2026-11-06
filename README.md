@@ -1,6 +1,19 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="Architecton logo: a stone arch with a gold keystone framing a check mark" width="120">
+</p>
+
 # Architecton (ἀρχιτέκτων)
 
 **From human intentions to verifiable executable systems.**
+
+[![DriverPass](https://github.com/yasir2000/Architecton/actions/workflows/verify-driverpass.yml/badge.svg)](https://github.com/yasir2000/Architecton/actions/workflows/verify-driverpass.yml)
+[![Typed IR](https://github.com/yasir2000/Architecton/actions/workflows/verify-ir.yml/badge.svg)](https://github.com/yasir2000/Architecton/actions/workflows/verify-ir.yml)
+[![Design models](https://github.com/yasir2000/Architecton/actions/workflows/verify-design.yml/badge.svg)](https://github.com/yasir2000/Architecton/actions/workflows/verify-design.yml)
+[![Evidence ledger](https://github.com/yasir2000/Architecton/actions/workflows/ledger.yml/badge.svg)](https://github.com/yasir2000/Architecton/actions/workflows/ledger.yml)
+[![Lifecycle](https://github.com/yasir2000/Architecton/actions/workflows/verify-lifecycle.yml/badge.svg)](https://github.com/yasir2000/Architecton/actions/workflows/verify-lifecycle.yml)
+[![License: Source-Available 1.0](https://img.shields.io/badge/license-Source--Available%201.0-1E2A5A)](LICENSE)
+
+[Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md) · [Brand](docs/brand.md)
 
 Architecton explores semantics-preserving refinement from stakeholder intentions, business and system requirements, and design models to mechanized formal specifications, kernel-checked proofs, executable services, infrastructure, and runtime evidence.
 
