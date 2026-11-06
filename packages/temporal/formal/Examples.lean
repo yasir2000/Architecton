@@ -75,4 +75,10 @@ example : (runF driverpass DriverPassTx.demo dpReqs).any
 example : (runF driverpass DriverPassTx.demo dpReqs).all d2Atom = true := by decide
 #check @D5_extensions
 
+/-! ## DriverPass liveness: D4b's assumptions hold for a client that keeps retrying -/
+
+example : sat (runFrom driverpass DriverPassTx.demo (fun _ => (7, 42, none))) 0
+    (.eventually (.always (.atom fun r => (DriverPassTx.slotsOf r.post.allocations 7).contains 42))) :=
+  D4b DriverPassTx.demo 7 42 ⟨false, []⟩ (by decide) rfl _ (fun n => ⟨n, Nat.le_refl _, rfl⟩)
+
 end Architecton.Temporal.Examples

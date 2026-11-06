@@ -159,4 +159,77 @@ theorem D5_extensions (w : Nat → Db) (h : prefixOf w 2 = racyTrace) :
   rw [h, D5] at this
   exact Bool.false_ne_true this
 
+/-! ## D4b: liveness under retry fairness -/
+
+theorem instructors_stable (db : Db) (q : Req) :
+    (driverpass.step db q).1.instructors = db.instructors := by
+  obtain ⟨i, slot, f⟩ := q
+  show (assignTx db i slot f).1.instructors = db.instructors
+  unfold assignTx
+  cases hr : roster db i with
+  | none => rfl
+  | some cur =>
+    simp only
+    cases f with
+    | some f => cases f <;> simp
+    | none => by_cases ha : (allocate cur slot).2 = .accepted <;> simp [ha]
+
+theorem mem_slotsOf {as : List (Nat × Nat)} {i slot : Nat} :
+    slot ∈ slotsOf as i ↔ (i, slot) ∈ as := by
+  unfold slotsOf
+  simp only [List.mem_map, List.mem_filter, beq_iff_eq]
+  constructor
+  · rintro ⟨⟨j, s⟩, ⟨h, rfl⟩, rfl⟩; exact h
+  · intro h; exact ⟨(i, slot), ⟨h, rfl⟩, rfl⟩
+
+theorem roster_lookup {db : Db} {i : Nat} {r : Roster} (h : roster db i = some r) :
+    db.instructors.lookup i = some r.offDuty := by
+  unfold roster at h
+  cases hl : db.instructors.lookup i with
+  | none => simp [hl] at h
+  | some off => simp [hl] at h; rw [← h]
+
+/-- A fault-free request by an on-duty instructor books the slot: it is
+accepted, or the slot was already booked. -/
+theorem request_books (db : Db) (i slot : Nat) (cur : Roster) (hr : roster db i = some cur)
+    (hon : cur.offDuty = false) : (i, slot) ∈ (assignTx db i slot none).1.allocations := by
+  have hs := roster_slots hr
+  by_cases hin : slot ∈ cur.slots
+  · simp [assignTx, hr, allocate, hon, hin]
+    rw [hs] at hin
+    exact mem_slotsOf.1 hin
+  · simp [assignTx, hr, allocate, hon, hin]
+
+theorem D4b (db0 : Db) (i slot : Nat) (r0 : Roster) (hr : roster db0 i = some r0)
+    (hon : r0.offDuty = false) (u : Nat → Req) (hinf : ∀ n, ∃ m ≥ n, u m = (i, slot, none)) :
+    sat (runFrom driverpass db0 u) 0
+      (.eventually (.always (.atom fun r => (slotsOf r.post.allocations i).contains slot))) := by
+  -- the instructor list never changes, so `i` stays known and on duty
+  have hlook : ∀ n, (statesFrom driverpass db0 u n).instructors.lookup i = some false := by
+    intro n
+    induction n with
+    | zero => rw [← hon]; exact roster_lookup hr
+    | succ n ih => show (driverpass.step _ _).1.instructors.lookup i = _; rw [instructors_stable]; exact ih
+  have hros : ∀ n, roster (statesFrom driverpass db0 u n) i =
+      some ⟨false, slotsOf (statesFrom driverpass db0 u n).allocations i⟩ := by
+    intro n; unfold roster; rw [hlook n]; rfl
+  obtain ⟨m, _, hm⟩ := hinf 0
+  have hbook : (i, slot) ∈ (statesFrom driverpass db0 u (m + 1)).allocations := by
+    show (i, slot) ∈ (driverpass.step (statesFrom driverpass db0 u m) (u m)).1.allocations
+    rw [hm]
+    exact request_books _ i slot _ (hros m) rfl
+  -- allocations only grow (D2), so the booking persists
+  have hkeep : ∀ k, (i, slot) ∈ (statesFrom driverpass db0 u (m + 1 + k)).allocations := by
+    intro k
+    induction k with
+    | zero => exact hbook
+    | succ k ih =>
+      rw [← Nat.add_assoc]
+      exact tx_alloc_mono (statesFrom driverpass db0 u (m + 1 + k)) _ _ _ _ ih
+  refine sat_eventually_always_iff.2 ⟨m, fun n hn => ?_⟩
+  show (slotsOf (statesFrom driverpass db0 u (n + 1)).allocations i).contains slot = true
+  have := hkeep (n - m)
+  rw [show m + 1 + (n - m) = n + 1 by omega] at this
+  simpa using mem_slotsOf.2 this
+
 end Architecton.Temporal
