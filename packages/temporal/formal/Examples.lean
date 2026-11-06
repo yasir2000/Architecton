@@ -1,6 +1,7 @@
 import Temporal
 import Bridge
 import System
+import LifecycleTemporal
 
 /-! Decide-checked examples and sanity runs for the temporal core. -/
 
@@ -40,5 +41,18 @@ example (u : Nat → Bool) : sat (runFrom ctr 0 u) 0 (.always (.atom fun r => de
 example (u : Nat → Bool) (h : ∀ n, ∃ m ≥ n, u m = true) :
     sat (runFrom ctr 0 u) 0 (infOften (.atom fun r => r.input)) :=
   sat_infOften_atom_iff.2 (by simpa [runFrom, recAt] using h)
+
+/-! ## Lifecycle: the antecedents of L1, L2 and L5 actually occur -/
+
+open Architecton.Lifecycle in
+example : (runF lifecycle initial (reachCmds ++ [.reviseRequirements])).any
+    (fun r => r.input == .promote && r.out == .accepted) = true := by decide
+open Architecton.Lifecycle in
+example : (runF lifecycle initial (reachCmds ++ [.reviseRequirements])).any
+    (fun r => r.input == .reviseRequirements) = true := by decide
+open Architecton.Lifecycle in
+example : (runF lifecycle initial (reachCmds ++ [.reviseRequirements])).all l2Atom = true := by decide
+open Architecton.Lifecycle in
+example : (finalState lifecycle initial reachCmds).phase = .transition := L5_reach _
 
 end Architecton.Temporal.Examples
