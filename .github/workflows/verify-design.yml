@@ -1,0 +1,46 @@
+name: Verify Architecton design models
+
+on:
+  push:
+    paths:
+      - 'packages/design/**'
+      - 'packages/lifecycle/**'
+      - 'examples/driverpass/**'
+      - '.github/workflows/verify-design.yml'
+  pull_request:
+    paths:
+      - 'packages/design/**'
+      - 'packages/lifecycle/**'
+      - 'examples/driverpass/**'
+      - '.github/workflows/verify-design.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  design-assurance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit-test the design checker
+        run: python3 -m unittest discover -s packages/design/tests -v
+      - name: Check state, sequence, class and ArchiMate models
+        run: >
+          python3 packages/design/scripts/designc.py check
+          packages/lifecycle/design/conformance.json
+          examples/driverpass/design/conformance.json
+      - name: Check the generated Lean diagram model is in sync
+        run: python3 packages/design/scripts/designc.py lean --check packages/lifecycle/design/conformance.json
+      - name: Install Lean 4 via elan
+        run: |
+          curl -fsSL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel-check that the state diagram behaves like the lifecycle model
+        working-directory: packages/lifecycle
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          LEAN_PATH=formal lean -o formal/ArchitectonLifecycle.olean formal/ArchitectonLifecycle.lean
+          LEAN_PATH=formal lean -o formal/Policy.olean formal/Policy.lean
+          LEAN_PATH=formal lean -o formal/StateMachine.olean formal/StateMachine.lean
+          LEAN_PATH=formal lean formal/PhaseDiagram.lean

@@ -1,0 +1,23 @@
+{
+  "checks": [
+    {
+      "kind": "state",
+      "diagram": "packages/lifecycle/design/phase-state-machine.puml",
+      "policy": "packages/lifecycle/requirements/policy.json",
+      "states": {
+        "Inception": "inception",
+        "Elaboration": "elaboration",
+        "Construction": "construction",
+        "Transition": "transition"
+      },
+      "events": ["promote", "iterate", "reviseRequirements"],
+      "abstracted_events": ["recordValidated"],
+      "evidence": [
+        "requirementsReviewed", "traceabilityReviewed", "designReviewed",
+        "formalSpecificationChecked", "proofChecked", "conformancePassed",
+        "artifactBuilt", "deploymentValidated"
+      ],
+      "lean_out": "packages/lifecycle/formal/PhaseDiagram.lean"
+    }
+  ]
+}

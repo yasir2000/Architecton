@@ -15,10 +15,14 @@
 | INV-001 (no slot held twice) is preserved | Lean theorems `allocate_preserves_nodup`, `ir_preserves_inv001` | All rosters and slots; Lean model only |
 | Rust agrees with Lean on the oracle | 850 IR-derived vectors, each kernel-checked against Lean ([Oracle.lean](../examples/driverpass/ir/Oracle.lean)), replayed in Rust ([oracle.rs](../examples/driverpass/backend/tests/oracle.rs)) | Bounded: rosters of length ≤ 3 over slots 0–3, requests 0–4 |
 | Rust ↔ Lean equivalence for all inputs | **Not proved** | Bounded testing only; Rust `i64` vs Lean `Nat` also differ on negative slots, which the API rejects before `allocate` |
+| Phase state diagram behaves like the lifecycle model | Lean theorem `diagram_matches_step` ([PhaseDiagram.lean](../packages/lifecycle/formal/PhaseDiagram.lean)), generated from the diagram | All process states and drawn events; phase and outcome only; `recordValidated` abstracted |
+| Sequence, class and ArchiMate models agree with the code, IR and Lean model | `designc.py` conformance checks, 30 tests | Step order checked textually; ArchiMate rules are a conservative subset of 3.2 |
+| Revoking evidence or changing an input invalidates exactly the dependent evidence | Lean theorem `valid_blockMore_iff` ([Ledger.lean](../packages/ledger/formal/Ledger.lean)), no axioms; 18 ledger tests | Ledger validity rule; assumes declared check inputs are complete |
+| Who produced a check result | SSH signatures checked against `evidence/allowed_signers` | Proves who signed, not that the run was honest; no keys configured yet |
 | Correctness of compiler, SQLite, OS, network or Docker | **Not proved** | Outside trusted model boundary |
 | Authentication and authorization | **Not implemented** | Do not expose the example publicly |
 
-Lean proof files contain no project-specific axioms or `sorry` by design. Proofs are authoritative only if successfully checked with the pinned Lean toolchain. A GitHub Actions workflow is provided to run the checks; this staging environment could only run the Python generator and scenario validator.
+Lean proof files contain no project-specific axioms or `sorry` by design. Proofs are authoritative only if successfully checked with the pinned Lean toolchain. GitHub Actions workflows run the checks. To record who ran which check on which inputs, run them through the [evidence ledger](../packages/ledger/README.md), which signs each result and lists exactly what needs re-running after a change.
 
 The sample API is educational. It lacks authentication, authorization and abuse protection, and must remain loopback-only.
 

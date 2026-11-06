@@ -1,0 +1,28 @@
+name: Feature or research proposal
+description: Propose a new capability, proof or roadmap work.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or research question
+      description: What gap in the requirements-to-runtime chain does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What would be built, proved or checked?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and limits
+      description: What would count as done? What would it assume, and what would stay unproved?
+  - type: input
+    id: roadmap
+    attributes:
+      label: Roadmap item
+      placeholder: e.g. Temporal/runtime verification (M4)

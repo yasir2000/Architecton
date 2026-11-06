@@ -9,3 +9,6 @@
 *.pyc
 .env
 .DS_Store
+
+# Local-only Concept Atlas implementation (never pushed)
+/concepts/

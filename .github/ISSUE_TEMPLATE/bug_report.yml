@@ -1,0 +1,39 @@
+name: Bug report
+description: Something fails, a check is wrong, or a claim doesn't hold.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: For security problems, don't file an issue. Follow [SECURITY.md](../blob/main/SECURITY.md) instead.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - DriverPass example (Lean, Rust, API)
+        - packages/ir
+        - packages/design
+        - packages/ledger
+        - packages/lifecycle
+        - CI / tooling
+        - Docs or claims
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include the exact command and its output.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: OS, Lean toolchain, Rust and Python versions, commit

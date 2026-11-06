@@ -1,0 +1,40 @@
+{
+  "checks": [
+    {
+      "kind": "sequence",
+      "diagram": "examples/driverpass/design/sequence.puml",
+      "steps": [
+        {"name": "begin", "diagram": "BEGIN IMMEDIATE", "code": "TransactionBehavior::Immediate"},
+        {"name": "read", "diagram": "Read roster", "code": "load_roster(&tx", "lean": "match roster db i"},
+        {"name": "decide", "diagram": "allocate(roster,42)", "code": "allocate(&current", "lean": "allocate cur slot"},
+        {"name": "insert allocation", "diagram": "INSERT allocation", "when": ["accepted"],
+         "code": "INSERT INTO allocations", "lean": "allocations := (i, slot)"},
+        {"name": "audit", "diagram": "INSERT audit decision", "code": "INSERT INTO allocation_audit",
+         "lean": "audit := (i, slot"},
+        {"name": "commit", "diagram": "COMMIT", "code": "tx.commit()", "lean": "(db2, .decided"}
+      ],
+      "code": {"file": "examples/driverpass/backend/src/service.rs", "function": "pub fn assign_slot_tx"},
+      "lean": {"file": "examples/driverpass/formal/Transactions.lean", "definition": "def assignTx"}
+    },
+    {
+      "kind": "class",
+      "diagram": "examples/driverpass/design/domain.puml",
+      "ir": "examples/driverpass/ir/driverpass.ir.json",
+      "types": {"Boolean": "Bool", "Integer": "Nat", "List<Integer>": "List Nat"},
+      "state_class": {
+        "InstructorRoster": {"fields": {"offDuty": "offDuty", "slots": "slots"}, "keys": ["instructorId"]}
+      },
+      "outcome_enum": {
+        "Decision": {
+          "lean_file": "examples/driverpass/formal/DriverPass.lean",
+          "rust_file": "examples/driverpass/backend/src/domain.rs"
+        }
+      }
+    },
+    {
+      "kind": "archimate",
+      "model": "examples/driverpass/design/architecture.json",
+      "ir": "examples/driverpass/ir/driverpass.ir.json"
+    }
+  ]
+}

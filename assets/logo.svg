@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-labelledby="title desc">
+  <title id="title">Architecton</title>
+  <desc id="desc">A stone arch with a gold keystone, framing a check mark: a structure whose correctness is verified.</desc>
+  <rect width="128" height="128" rx="24" fill="#1E2A5A"/>
+  <!-- arch voussoirs -->
+  <g fill="none" stroke="#E8ECF7" stroke-width="12" stroke-linecap="butt">
+    <path d="M28 104 V66 A36 36 0 0 1 50 33"/>
+    <path d="M100 104 V66 A36 36 0 0 0 78 33"/>
+  </g>
+  <!-- joints between arch stones -->
+  <g stroke="#1E2A5A" stroke-width="2.5">
+    <line x1="22" y1="82" x2="34" y2="82"/>
+    <line x1="94" y1="82" x2="106" y2="82"/>
+    <line x1="23" y1="60" x2="35" y2="63"/>
+    <line x1="105" y1="60" x2="93" y2="63"/>
+  </g>
+  <!-- keystone -->
+  <path d="M52 22 H76 L72 42 H56 Z" fill="#D4A72C"/>
+  <!-- verified check under the arch -->
+  <path d="M46 80 L58 92 L84 62" fill="none" stroke="#3CC48F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- base line -->
+  <rect x="18" y="104" width="92" height="6" rx="3" fill="#D4A72C"/>
+</svg>

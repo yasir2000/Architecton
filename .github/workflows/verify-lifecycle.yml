@@ -48,3 +48,4 @@ jobs:
           LEAN_PATH=formal lean -o formal/StateMachine.olean formal/StateMachine.lean
           LEAN_PATH=formal lean formal/Proofs.lean
           LEAN_PATH=formal lean formal/Scenarios.lean
+          LEAN_PATH=formal lean formal/PhaseDiagram.lean

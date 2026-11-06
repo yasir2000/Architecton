@@ -1,0 +1,139 @@
+{
+  "ledger_version": "1.0.0",
+  "checks": [
+    {
+      "id": "ir-unit",
+      "description": "Unit tests for the IR checker and interpreter",
+      "argv": ["python3", "-m", "unittest", "discover", "-s", "packages/ir/tests"],
+      "inputs": [
+        "packages/ir/scripts/*.py", "packages/ir/tests/*.py",
+        "examples/driverpass/ir/driverpass.ir.json", "examples/driverpass/ir/DriverPassIR.lean",
+        "CS 255 Business Requirements Document Template.docx",
+        "examples/driverpass/requirements/*", "examples/driverpass/design/*",
+        "examples/driverpass/formal/*.lean", "examples/driverpass/ir/*.lean",
+        "examples/driverpass/backend/src/*.rs", "examples/driverpass/backend/tests/*.rs",
+        "examples/driverpass/contracts/*", "examples/driverpass/scripts/*.py"
+      ]
+    },
+    {
+      "id": "ir-check",
+      "description": "IR structure, types, references, artifact hashes and anchors",
+      "argv": ["python3", "packages/ir/scripts/irc.py", "check", "examples/driverpass/ir/driverpass.ir.json"],
+      "inputs": [
+        "packages/ir/scripts/irc.py", "examples/driverpass/ir/driverpass.ir.json",
+        "CS 255 Business Requirements Document Template.docx",
+        "examples/driverpass/requirements/*", "examples/driverpass/design/*",
+        "examples/driverpass/formal/*.lean", "examples/driverpass/ir/*.lean",
+        "examples/driverpass/backend/src/*.rs", "examples/driverpass/backend/tests/*.rs",
+        "examples/driverpass/contracts/*", "examples/driverpass/scripts/*.py"
+      ]
+    },
+    {
+      "id": "oracle-sync",
+      "description": "The cross-language oracle matches the IR",
+      "argv": ["python3", "examples/driverpass/scripts/gen_oracle.py", "--check"],
+      "inputs": [
+        "examples/driverpass/scripts/gen_oracle.py", "packages/ir/scripts/irc.py",
+        "examples/driverpass/ir/driverpass.ir.json", "examples/driverpass/ir/oracle.json",
+        "examples/driverpass/ir/Oracle.lean"
+      ],
+      "depends_on": ["ir-check"]
+    },
+    {
+      "id": "driverpass-generated",
+      "description": "Generated Lean and Rust adapters match the policy",
+      "argv": ["python3", "scripts/generate.py", "--check"],
+      "cwd": "examples/driverpass",
+      "inputs": [
+        "examples/driverpass/scripts/generate.py", "examples/driverpass/requirements/policy.json",
+        "examples/driverpass/contracts/scenarios.json", "examples/driverpass/formal/DriverPass.lean",
+        "examples/driverpass/formal/Scenarios.lean", "examples/driverpass/backend/src/domain.rs"
+      ]
+    },
+    {
+      "id": "lean-ir",
+      "description": "Kernel-check IR semantics, step semantics and negative cases",
+      "argv": ["python3", "packages/ledger/scripts/lean_build.py", "--path", "packages/ir/formal",
+               "packages/ir/formal/ArtifactIR.lean", "packages/ir/formal/Step.lean",
+               "packages/ir/formal/Negative.lean"],
+      "inputs": ["packages/ir/formal/*.lean", "packages/ir/lean-toolchain", "packages/ledger/scripts/lean_build.py"]
+    },
+    {
+      "id": "lean-driverpass",
+      "description": "Kernel-check the DriverPass spec, proofs, scenarios and transaction model",
+      "argv": ["python3", "packages/ledger/scripts/lean_build.py", "--path", "examples/driverpass/formal",
+               "examples/driverpass/formal/DriverPass.lean", "examples/driverpass/formal/Proofs.lean",
+               "examples/driverpass/formal/Scenarios.lean", "examples/driverpass/formal/Transactions.lean"],
+      "inputs": ["examples/driverpass/formal/*.lean", "examples/driverpass/lean-toolchain",
+                 "packages/ledger/scripts/lean_build.py"],
+      "depends_on": ["driverpass-generated"]
+    },
+    {
+      "id": "lean-conformance",
+      "description": "Kernel-check IR well-formedness, IR-Lean refinement and the oracle",
+      "argv": ["python3", "packages/ledger/scripts/lean_build.py",
+               "--path", "packages/ir/formal", "--path", "examples/driverpass/formal",
+               "--path", "examples/driverpass/ir",
+               "packages/ir/formal/ArtifactIR.lean", "packages/ir/formal/Step.lean",
+               "examples/driverpass/formal/DriverPass.lean",
+               "examples/driverpass/ir/DriverPassIR.lean", "examples/driverpass/ir/Refinement.lean",
+               "examples/driverpass/ir/Oracle.lean"],
+      "inputs": ["examples/driverpass/ir/*.lean", "packages/ir/formal/*.lean",
+                 "examples/driverpass/formal/DriverPass.lean", "packages/ledger/scripts/lean_build.py"],
+      "depends_on": ["lean-ir", "lean-driverpass", "ir-check", "oracle-sync"]
+    },
+    {
+      "id": "rust-tests",
+      "description": "Rust contract, oracle and SQLite transaction tests",
+      "argv": ["cargo", "test", "--manifest-path", "examples/driverpass/backend/Cargo.toml"],
+      "inputs": [
+        "examples/driverpass/backend/Cargo.toml", "examples/driverpass/backend/src/*.rs",
+        "examples/driverpass/backend/tests/*.rs", "examples/driverpass/ir/oracle.json",
+        "examples/driverpass/contracts/scenarios.json"
+      ],
+      "depends_on": ["lean-conformance", "driverpass-generated"]
+    },
+    {
+      "id": "lean-lifecycle",
+      "description": "Kernel-check the RUP lifecycle model and theorems",
+      "argv": ["python3", "packages/ledger/scripts/lean_build.py", "--path", "packages/lifecycle/formal",
+               "packages/lifecycle/formal/ArchitectonLifecycle.lean", "packages/lifecycle/formal/Policy.lean",
+               "packages/lifecycle/formal/StateMachine.lean", "packages/lifecycle/formal/Proofs.lean",
+               "packages/lifecycle/formal/Scenarios.lean",
+               "packages/lifecycle/formal/PhaseDiagram.lean"],
+      "inputs": ["packages/lifecycle/formal/*.lean", "packages/lifecycle/lean-toolchain",
+                 "packages/ledger/scripts/lean_build.py"]
+    },
+    {
+      "id": "lean-ledger",
+      "description": "Kernel-check the ledger validity and revocation theorems",
+      "argv": ["python3", "packages/ledger/scripts/lean_build.py", "--path", "packages/ledger/formal",
+               "packages/ledger/formal/Ledger.lean"],
+      "inputs": ["packages/ledger/formal/*.lean", "packages/ledger/lean-toolchain",
+                 "packages/ledger/scripts/lean_build.py"]
+    },
+    {
+      "id": "design-check",
+      "description": "Design models conform to the formal models, IR and code",
+      "argv": ["python3", "packages/design/scripts/designc.py", "check",
+               "packages/lifecycle/design/conformance.json", "examples/driverpass/design/conformance.json"],
+      "inputs": [
+        "packages/design/scripts/designc.py", "packages/design/tests/*.py",
+        "packages/lifecycle/design/*", "packages/lifecycle/requirements/policy.json",
+        "packages/lifecycle/formal/PhaseDiagram.lean",
+        "examples/driverpass/design/*", "examples/driverpass/ir/driverpass.ir.json",
+        "examples/driverpass/backend/src/*.rs", "examples/driverpass/backend/Cargo.toml",
+        "examples/driverpass/formal/*.lean", "examples/driverpass/contracts/openapi.yaml",
+        "examples/driverpass/infra/Dockerfile"
+      ],
+      "depends_on": ["ir-check", "lean-lifecycle"]
+    },
+    {
+      "id": "ledger-unit",
+      "description": "Unit tests for the ledger itself",
+      "argv": ["python3", "-m", "unittest", "discover", "-s", "packages/ledger/tests"],
+      "inputs": ["packages/ledger/scripts/ledger.py", "packages/ledger/tests/*.py"],
+      "depends_on": ["lean-ledger"]
+    }
+  ]
+}
