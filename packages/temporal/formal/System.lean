@@ -173,4 +173,22 @@ theorem sat_eventually_always_iff {w : Nat → α} {φ : LTL α} :
   · rintro ⟨T, _, h⟩; exact ⟨T, sat_always_iff.1 h⟩
   · rintro ⟨T, h⟩; exact ⟨T, Nat.zero_le _, sat_always_iff.2 h⟩
 
+theorem sat_WF_atom_iff {w : Nat → α} {en tk : α → Bool} :
+    sat w 0 (WF (.atom en) (.atom tk)) ↔
+      ((∃ T, ∀ n ≥ T, en (w n) = true) → ∀ n, ∃ m ≥ n, tk (w m) = true) := by
+  have h : sat w 0 (infOften (.atom tk)) ↔ _ := sat_infOften_atom_iff
+  unfold infOften at h
+  unfold WF
+  rw [sat_imp_iff, sat_eventually_always_iff, h]
+  exact Iff.rfl
+
+theorem sat_SF_atom_iff {w : Nat → α} {en tk : α → Bool} :
+    sat w 0 (SF (.atom en) (.atom tk)) ↔
+      ((∀ n, ∃ m ≥ n, en (w m) = true) → ∀ n, ∃ m ≥ n, tk (w m) = true) := by
+  have he : sat w 0 (infOften (.atom en)) ↔ _ := sat_infOften_atom_iff
+  have ht : sat w 0 (infOften (.atom tk)) ↔ _ := sat_infOften_atom_iff
+  unfold infOften at he ht
+  unfold SF
+  rw [sat_imp_iff, he, ht]
+
 end Architecton.Temporal

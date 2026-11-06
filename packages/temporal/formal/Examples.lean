@@ -43,6 +43,39 @@ example (u : Nat → Bool) (h : ∀ n, ∃ m ≥ n, u m = true) :
     sat (runFrom ctr 0 u) 0 (infOften (.atom fun r => r.input)) :=
   sat_infOften_atom_iff.2 (by simpa [runFrom, recAt] using h)
 
+/-- A countdown: each `true` input decrements. -/
+def cdown : System Nat Bool Unit := ⟨5, fun s b => (if b then s - 1 else s, ())⟩
+
+theorem cdown_le (s : Nat) (b : Bool) : (cdown.step s b).1 ≤ s := by
+  cases b <;> simp [cdown]
+
+theorem cdown_lt (s : Nat) (h : 0 < s) : (cdown.step s true).1 < s := by
+  simp [cdown]; omega
+
+/-- `ranking_rule` in use: with infinitely many decrements the countdown reaches 0. -/
+example (u : Nat → Bool) (h : ∀ n, ∃ m ≥ n, u m = true) :
+    sat (run cdown u) 0 (.eventually (.atom fun r => decide (r.pre = 0))) :=
+  ranking_rule (run cdown u) (fun _ => rfl) id (fun r => r.input) (fun r => decide (r.pre = 0)) 0
+    (fun _ _ => cdown_le _ _)
+    (fun n _ hh hp => by
+      have hu : u n = true := hh
+      show (cdown.step _ (u n)).1 < _
+      rw [hu]; exact cdown_lt _ hp)
+    (by simpa [run, runFrom, recAt] using h)
+    (fun _ h0 => by simpa using h0)
+
+/-- Weak fairness: taken infinitely often satisfies WF for any enabling condition. -/
+example (u : Nat → Bool) (h : ∀ n, ∃ m ≥ n, u m = true) :
+    sat (runFrom ctr 0 u) 0 (WF (.atom fun _ => true) (.atom fun r => r.input)) :=
+  sat_WF_atom_iff.2 fun _ => by simpa [runFrom, recAt] using h
+
+/-- Strong fairness fails when enabled infinitely often but never taken. -/
+example : ¬ sat (runFrom ctr 0 fun _ => false) 0 (SF (.atom fun _ => true) (.atom fun r => r.input)) := by
+  rw [sat_SF_atom_iff]
+  intro h
+  obtain ⟨m, _, hm⟩ := h (fun n => ⟨n, Nat.le_refl _, rfl⟩) 0
+  simp [runFrom, recAt] at hm
+
 /-! ## Lifecycle: the antecedents of L1, L2 and L5 actually occur -/
 
 open Architecton.Lifecycle in
