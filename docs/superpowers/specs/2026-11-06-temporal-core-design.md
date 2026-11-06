@@ -146,7 +146,7 @@ System: `assignTx` over `Db`; input `(i, slot, fault) : Nat × Nat × Option Fau
 | D3 | response | `□(roster pre i ≠ none ∧ fault = none → ∃ d r, out = decided d r ∧ post.audit = (i, slot, d) :: pre.audit)` |
 | D4a | progress | for every db, if `roster db i = some r` with `r.offDuty = false` and `slot ∉ slotsOf db.allocations i`, then input `(i, slot, none)` returns `decided accepted` |
 | D4b | liveness | `roster db i = some r` with `r.offDuty = false` for the initial db ∧ `□◇(input = (i, slot, none))` → `◇□(slot ∈ slotsOf post.allocations i)` |
-| D5 | violation | the `racyPair demo 7 42` interleaving, as a finite trace, has `satF … (□ atom allocOkB) = false` by `decide`; with `safe_prefix`, every run extending it violates D1's formula |
+| D5 | violation | `racyTrace : List Db` is `[demo, racyPair demo 7 42]` (the state before and after the lost-update interleaving); `satF racyTrace 0 (□ atom allocOkB) = false` by `decide`, so by `safe_prefix` every infinite state sequence starting with this trace violates `□ atom allocOkB` |
 
 D4b holds with arbitrary faults in between because `assignTx` never changes `instructors` and allocations only grow (D2).
 
