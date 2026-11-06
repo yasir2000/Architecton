@@ -31,3 +31,11 @@ The sample API is educational. It lacks authentication, authorization and abuse 
 The `packages/lifecycle` module defines Lean 4 theorem obligations for safe promotions, no phase skipping, blocked-state immutability, baseline revision invalidation, and the construction release gate. It includes 12 Python reference scenarios and a bounded sweep of 1,024 phase/evidence states. **Theorem proofs are not kernel-confirmed until the pinned Lean CI job completes successfully.**
 
 An external authority is assumed to provide trustworthy `recordValidated` evidence. The module itself neither authenticates the attester nor checks proofs, source hashes, signed attestations, build provenance, deployment health, or cross-language compiler refinement. The model is an educational verification process, not a production compliance controller.
+
+## Temporal properties (packages/temporal)
+
+The [temporal core](../packages/temporal/README.md) proves LTL properties of whole runs of the lifecycle and DriverPass models. Its limits:
+
+- The theorems are about the **Lean models**, not the running Rust service or a deployed system. They inherit DriverPass assumptions A1 (atomicity) and A2 (isolation, serial order) from `Transactions.lean` and the lifecycle's trusted-attestation assumption.
+- Fairness conditions are assumptions about the environment (clients retry; the team keeps recording evidence and promoting). The system does not guarantee them.
+- Runtime trace monitoring, concurrency beyond A2, and distributed consistency are not covered yet.

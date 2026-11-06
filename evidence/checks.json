@@ -129,6 +129,18 @@
       "depends_on": ["ir-check", "lean-lifecycle"]
     },
     {
+      "id": "temporal-lean",
+      "description": "Lean temporal core: LTL semantics, bridge theorems, lifecycle L1-L6 and DriverPass D1-D5",
+      "argv": ["python3", "packages/temporal/scripts/verify.py"],
+      "inputs": [
+        "packages/temporal/formal/*.lean", "packages/temporal/scripts/*.py",
+        "packages/temporal/lean-toolchain",
+        "packages/lifecycle/formal/*.lean", "examples/driverpass/formal/*.lean",
+        "packages/ledger/scripts/lean_build.py"
+      ],
+      "depends_on": ["lean-lifecycle", "lean-driverpass"]
+    },
+    {
       "id": "ledger-unit",
       "description": "Unit tests for the ledger itself",
       "argv": ["python3", "-m", "unittest", "discover", "-s", "packages/ledger/tests"],

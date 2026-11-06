@@ -6,6 +6,7 @@ All notable changes to Architecton are recorded here. The format follows [Keep a
 
 ### Added
 
+- Lean temporal core: LTL with infinite and finite semantics, bridge theorems, proof rules and fairness, and kernel-checked temporal properties of the lifecycle (L1-L6) and DriverPass (D1-D5) models.
 - Project branding: logo, brand guide, contributor and security docs, issue and PR templates.
 - Design refinements: UML state, sequence and class diagrams and a typed ArchiMate model, checked against the formal models, IR and code. A Lean proof shows the phase state diagram matches the lifecycle model.
 - Signed evidence ledger with content-addressed results, a dependency graph and revocation, with a Lean theorem on revocation scope.
