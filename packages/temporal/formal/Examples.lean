@@ -81,4 +81,26 @@ example : sat (runFrom driverpass DriverPassTx.demo (fun _ => (7, 42, none))) 0
     (.eventually (.always (.atom fun r => (DriverPassTx.slotsOf r.post.allocations 7).contains 42))) :=
   D4b DriverPassTx.demo 7 42 ⟨false, []⟩ (by decide) rfl _ (fun n => ⟨n, Nat.le_refl _, rfl⟩)
 
+/-! ## Axiom audit: read by `scripts/check_axioms.py` -/
+
+#print axioms Architecton.Temporal.safe_prefix
+#print axioms Architecton.Temporal.cosafe_prefix
+#print axioms Architecton.Temporal.L1
+#print axioms Architecton.Temporal.L2
+#print axioms Architecton.Temporal.L3
+#print axioms Architecton.Temporal.L4
+#print axioms Architecton.Temporal.L5_reach
+#print axioms Architecton.Temporal.L6
+#print axioms Architecton.Temporal.L6_ltl
+#print axioms Architecton.Temporal.L6_needs_no_revise
+#print axioms Architecton.Temporal.L6_needs_promote
+#print axioms Architecton.Temporal.L6_needs_evidence
+#print axioms Architecton.Temporal.D1
+#print axioms Architecton.Temporal.D2
+#print axioms Architecton.Temporal.D3
+#print axioms Architecton.Temporal.D4a
+#print axioms Architecton.Temporal.D4b
+#print axioms Architecton.Temporal.D5
+#print axioms Architecton.Temporal.D5_extensions
+
 end Architecton.Temporal.Examples
