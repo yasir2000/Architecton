@@ -2,6 +2,7 @@ import Temporal
 import Bridge
 import System
 import LifecycleTemporal
+import DriverPassTemporal
 
 /-! Decide-checked examples and sanity runs for the temporal core. -/
 
@@ -62,5 +63,16 @@ example : sat (run lifecycle uFair) 0 (.eventually (.atom atTransition)) :=
 #check @L6_needs_no_revise
 #check @L6_needs_promote
 #check @L6_needs_evidence
+
+/-! ## DriverPass: the antecedents of D2, D3 and D4a actually occur -/
+
+open DriverPassTx in
+def dpReqs : List Req := [(7, 42, none), (7, 42, none), (7, 43, some .atCommit), (9, 1, none)]
+example : (runF driverpass DriverPassTx.demo dpReqs).all d3Atom = true := by decide
+example : (runF driverpass DriverPassTx.demo dpReqs).any (fun r => !isDecided r.out) = true := by decide
+example : (runF driverpass DriverPassTx.demo dpReqs).any
+    (fun r => r.out matches .decided .accepted _) = true := by decide
+example : (runF driverpass DriverPassTx.demo dpReqs).all d2Atom = true := by decide
+#check @D5_extensions
 
 end Architecton.Temporal.Examples
