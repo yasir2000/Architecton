@@ -55,4 +55,12 @@ example : (runF lifecycle initial (reachCmds ++ [.reviseRequirements])).all l2At
 open Architecton.Lifecycle in
 example : (finalState lifecycle initial reachCmds).phase = .transition := L5_reach _
 
+/-! ## Lifecycle liveness: L6 applies to a concrete fair stream -/
+
+example : sat (run lifecycle uFair) 0 (.eventually (.atom atTransition)) :=
+  L6 uFair uFair_assumptions.1 uFair_assumptions.2.1 uFair_assumptions.2.2
+#check @L6_needs_no_revise
+#check @L6_needs_promote
+#check @L6_needs_evidence
+
 end Architecton.Temporal.Examples

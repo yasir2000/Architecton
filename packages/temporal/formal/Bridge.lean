@@ -85,6 +85,15 @@ theorem sat_until_iff {w : Nat → α} {i : Nat} {φ ψ : LTL α} :
     sat w i (.until φ ψ) ↔ ∃ k, i ≤ k ∧ sat w k ψ ∧ ∀ j, i ≤ j → j < k → sat w j φ :=
   Iff.rfl
 
+theorem sat_all_iff {w : Nat → α} {i : Nat} {φs : List (LTL α)} :
+    sat w i (LTL.all φs) ↔ ∀ φ ∈ φs, sat w i φ := by
+  induction φs with
+  | nil => exact ⟨fun _ _ h => absurd h (List.not_mem_nil), fun _ => trivial⟩
+  | cons φ φs ih =>
+    show sat w i φ ∧ sat w i (LTL.all φs) ↔ _
+    rw [ih]
+    simp
+
 /-- `□` is `¬◇¬`, by definition, in both semantics. -/
 theorem sat_not_eventually_not {w : Nat → α} {i : Nat} {φ : LTL α} :
     sat w i (.not (.eventually (.not φ))) ↔ sat w i (.always φ) := Iff.rfl
