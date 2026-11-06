@@ -160,7 +160,7 @@ These two pre-existing Lean files are complementary to, but independent of, the 
 
 ## Research roadmap: next work packages
 
-The typed artifact IR, the evidence ledger and design refinements have working v1s, and cross-language conformance is implemented for the DriverPass slice. The rest are planned and not yet implemented; see the [milestones](docs/vision.md#milestones).
+The typed artifact IR, the evidence ledger and design refinements have working v1s, cross-language conformance is implemented for the DriverPass slice, and temporal verification has a Lean core. The rest are planned and not yet implemented; see the [milestones](docs/vision.md#milestones).
 
 - **Typed artifact IR** (v1 implemented, see [packages/ir](packages/ir/README.md)): goals, requirement statements, risk identifiers, typed state transitions, invariants, provenance anchors and artifact hashes. The DriverPass slice has a [checked IR instance](examples/driverpass/ir/driverpass.ir.json), and the Lean kernel proves it well-formed.
 - **Trusted evidence ledger** (implemented, see [packages/ledger](packages/ledger/README.md)): content-addressed inputs; CI-signed attestations; immutable proof results; validator identity; dependency DAG; revocation and scoped re-verification. Entries are signed with SSH keys; a Lean theorem shows revocation or a changed input invalidates exactly the dependent evidence, and `ledger.py run` re-runs only that. No signing key is configured yet.
@@ -172,7 +172,12 @@ The typed artifact IR, the evidence ledger and design refinements have working v
   - Rust tests against real SQLite: fault injection, concurrent connections, and every request sequence up to length 4.
 
   Still open: equivalence for all Rust inputs, and generalising beyond DriverPass.
-- **Temporal/runtime verification:** LTL/TLA+ transition properties, deadlock/liveness/fairness, distributed consistency and monitored production traces.
+- **Temporal/runtime verification** (Lean temporal core implemented, see [packages/temporal](packages/temporal/README.md)): LTL/TLA+ transition properties, deadlock/liveness/fairness, distributed consistency and monitored production traces. Done so far:
+  - one LTL syntax with infinite-trace and finite-trace (LTLf) semantics, and kernel-checked theorems linking them (a finite violation of a safety formula is final; a finite witness proves an eventuality);
+  - lifecycle: safe promotion, revision reset, no phase skipping, evidence monotonicity, deadlock-freedom, and liveness under explicit fairness assumptions, each shown necessary;
+  - DriverPass: no double booking on every infinite run, all-or-nothing, exactly-once audit, progress, a booking that lands and persists once one fault-free request is made, and the lost-update race as a temporal violation.
+
+  Still open: runtime monitoring of production traces, a TLA+ concurrency model, and distributed consistency.
 
 ## Principle
 

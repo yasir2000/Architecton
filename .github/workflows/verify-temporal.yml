@@ -1,0 +1,39 @@
+name: Verify Architecton temporal core
+
+on:
+  push:
+    paths:
+      - 'packages/temporal/**'
+      - 'packages/lifecycle/formal/**'
+      - 'examples/driverpass/formal/**'
+      - 'packages/ledger/scripts/lean_build.py'
+      - '.github/workflows/verify-temporal.yml'
+  pull_request:
+    paths:
+      - 'packages/temporal/**'
+      - 'packages/lifecycle/formal/**'
+      - 'examples/driverpass/formal/**'
+      - 'packages/ledger/scripts/lean_build.py'
+      - '.github/workflows/verify-temporal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  temporal-assurance:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit-test the axiom audit
+        run: python3 -m unittest discover -s packages/temporal/tests -v
+      - name: Install Lean 4 via elan
+        run: |
+          curl -fsSL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel-check the temporal core and audit its axioms
+        working-directory: packages/temporal
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lean --version
+          python3 scripts/verify.py
