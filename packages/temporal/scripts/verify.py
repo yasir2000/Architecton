@@ -28,14 +28,25 @@ DEPS = [
 MODULES = ["Temporal", "Bridge", "System", "LifecycleTemporal", "DriverPassTemporal", "Examples"]
 
 
+def build_env(base):
+    """Environment for the Lean build.
+
+    Pins the package's toolchain explicitly (ELAN_TOOLCHAIN): the build runs
+    from the repo root, which has no lean-toolchain file, and CI installs elan
+    without a default toolchain. Forces Python's UTF-8 mode so Windows does
+    not decode Lean's UTF-8 output as cp1252.
+    """
+    pinned = (ROOT / "packages/temporal/lean-toolchain").read_text(encoding="utf-8").strip()
+    return dict(base, ELAN_TOOLCHAIN=pinned, PYTHONUTF8="1")
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     files = DEPS + [f"packages/temporal/formal/{m}.lean" for m in MODULES]
     cmd = [sys.executable, "packages/ledger/scripts/lean_build.py"]
     for p in PATHS:
         cmd += ["--path", p]
-    # Lean prints UTF-8; force Python's UTF-8 mode so Windows does not decode it as cp1252.
-    env = dict(os.environ, PYTHONUTF8="1")
+    env = build_env(os.environ)
     proc = subprocess.run(cmd + files, cwd=ROOT, env=env, capture_output=True,
                           encoding="utf-8", errors="replace")
     log = proc.stdout + proc.stderr
