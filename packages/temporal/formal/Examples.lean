@@ -1,5 +1,6 @@
 import Temporal
 import Bridge
+import System
 
 /-! Decide-checked examples and sanity runs for the temporal core. -/
 
@@ -27,5 +28,17 @@ example : Safe (.always (.atom (fun n : Nat => decide (n > 0)))) := by repeat co
 example (w : Nat → Nat) (h : ∀ k, w k > 0) : satF (prefixOf w 5) 0 (.always (.atom (· > 0))) = true :=
   safe_prefix (by repeat constructor) ((sat_always_iff).2 fun j _ => by simp [sat_atom_iff, h]) (by decide)
 example : satF [3,1,2] 0 (.always (.atom (· > 0))) = [3,1,2].all (· > 0) := satF_always_atom
+
+/-! ## Systems, runs and proof rules, on a counter -/
+
+def ctr : System Nat Bool Unit := ⟨0, fun s b => (if b then s + 1 else s, ())⟩
+
+example : (runF ctr 0 [true, false, true]).map (·.post) = [1, 1, 2] := by decide
+example (u : Nat → Bool) : sat (runFrom ctr 0 u) 0 (.always (.atom fun r => decide (r.pre ≤ r.post))) :=
+  step_rule _ (fun _ => true) (fun _ => true) rfl (fun _ _ _ _ => rfl) (fun _ => rfl)
+    (by intro s b _ _; cases b <;> simp [recAt, ctr])
+example (u : Nat → Bool) (h : ∀ n, ∃ m ≥ n, u m = true) :
+    sat (runFrom ctr 0 u) 0 (infOften (.atom fun r => r.input)) :=
+  sat_infOften_atom_iff.2 (by simpa [runFrom, recAt] using h)
 
 end Architecton.Temporal.Examples
